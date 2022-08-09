@@ -106,3 +106,5 @@ export const getLocalTimestamp = (utcTimestamp: string) =>
     .utc(utcTimestamp)
     .utcOffset(moment().utcOffset())
     .format('YYYY-MM-DDTHH:mm:ssZ');
+
+export const generateReceiptNumber = () => moment().format('DDMMYYYYHHmmss');
