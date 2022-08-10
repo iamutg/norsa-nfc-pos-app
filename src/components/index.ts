@@ -5,6 +5,7 @@ import Button from './Button';
 import Header from './Header';
 import ScreenContainer from './ScreenContainer';
 import Loader from './Loader';
+import AlertModal from './AlertModal';
 
 const Icons = {
   MaterialCommunityIcons,
@@ -12,4 +13,4 @@ const Icons = {
   FontAwsome,
 };
 
-export {Icons, ScreenContainer, Button, Header, Loader};
+export {Icons, ScreenContainer, Button, Header, Loader, AlertModal};

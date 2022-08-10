@@ -158,8 +158,15 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           value: `${issuanceHistory?.paybackPeriod}`,
         }));
 
+      const smallestPaybackPeriod = `${
+        issuanceHistoriesRes?.data
+          ?.map?.(item => item.paybackPeriod)
+          ?.sort?.((a, b) => a - b)?.[0]
+      }`;
+
       setLoaderLoading(false);
       issuanceHistoriesRef.current = issuanceHistoriesRes?.data;
+      setSelectedPaybackPeriod(smallestPaybackPeriod);
       setPaybackPeriods(paybackPickerItems);
       showSelectPaybackPeriodModal();
     }

@@ -1,6 +1,7 @@
 import moment from 'moment';
 import {print} from '~/native_modules/PosPrinter';
 import {Client, DailyTransaction, TransactionType} from '~/types';
+import {generateReceiptNumber} from '~/utils';
 import {setPreviousPrintedReceipt} from './LocalStorageService';
 
 export const printText: (
@@ -26,7 +27,7 @@ export const printReceipt: (
   const textToBePrinted =
     "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
     '[L]\n' +
-    `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
+    `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
     `[L]\n` +
     '[C]==============================\n' +
@@ -95,7 +96,7 @@ export const printDailyReceipt: (
   const textToBePrinted =
     "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
     '[L]\n' +
-    `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
+    `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
     `[L]\n` +
     '[C]------------------------------\n' +
@@ -144,7 +145,7 @@ export const printBalance: (
   const textToBePrinted =
     "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
     '[L]\n' +
-    `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
+    `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
     `[L]\n` +
     '[C]==============================\n' +
