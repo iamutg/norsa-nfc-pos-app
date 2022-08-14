@@ -15,9 +15,16 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
+import Dialog from 'react-native-dialog';
 import {logo} from '~/assets/images';
-import {Button, Header, Icons, Loader, ScreenContainer} from '~/components';
-import BottomModal from '~/components/BottomModal';
+import {
+  Button,
+  Header,
+  Icons,
+  Loader,
+  ScreenContainer,
+  BottomModal,
+} from '~/components';
 import {appModes} from '~/constants';
 import {useAuthContext} from '~/context/AuthContext';
 import {
@@ -36,6 +43,7 @@ import {
   readNfcTag,
 } from '~/core/NfcReaderWriter';
 import {printBalance, printDailyReceipt} from '~/core/ReceiptPrinter';
+import {useModalState} from '~/hooks';
 import {routeNames} from '~/navigation/routeNames';
 import {Colors} from '~/styles';
 import {
@@ -71,6 +79,8 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   const [bottomModalShown, setBottomModalShown] = useState(false);
   const [selectPaybackPeriodModalShown, setSelectPaybackPeriodModalShown] =
     useState(false);
+  const [isRetourDialogShown, openRetourDialog, closeRetourDialog] =
+    useModalState();
   const [paybackPeriods, setPaybackPeriods] = useState<Array<PickerItem>>([]);
   const [selectedPaybackPeriod, setSelectedPaybackPeriod] = useState('');
   const [scanningStatus, setScanningStatus] =
@@ -295,6 +305,41 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     [],
   );
 
+  const onContinueToExpressScreen = useCallback(() => {
+    closeRetourDialog();
+
+    const paybackPeriodIndex = issuanceHistoriesRef.current?.findIndex(
+      issuanceHistory =>
+        `${issuanceHistory.paybackPeriod}` === selectedPaybackPeriod,
+    );
+    const issuanceHistory = issuanceHistoriesRef.current[paybackPeriodIndex];
+
+    gotoExpenseScreen(issuanceHistory);
+  }, [selectedPaybackPeriod]);
+
+  const gotoExpenseScreen = useCallback(
+    (issuanceHistory: IssuanceHistory) => {
+      navigate(routeNames.PrintExpense, {
+        client: {
+          id: issuanceHistory?.Client_id,
+          code: issuanceHistory?.clientCode,
+          name: issuanceHistory?.clientName,
+        },
+        paybackPeriod: issuanceHistory?.paybackPeriod,
+        maxAmount: parseFloat(
+          nfcTagScanningReason === 'expense'
+            ? issuanceHistory?.Balance
+            : issuanceHistory?.Amount,
+        ),
+        cardId: cardNumber,
+        pinCode: issuanceHistory?.Pincode,
+        issuanceHistoryId: issuanceHistory?.id,
+        paymentType: nfcTagScanningReason,
+      });
+    },
+    [cardNumber, nfcTagScanningReason, navigate],
+  );
+
   const onSelectPaybackPeriodNextButtonPressed = useCallback(() => {
     if (selectedPaybackPeriod && selectedPaybackPeriod !== 'none') {
       const paybackPeriodIndex = issuanceHistoriesRef.current?.findIndex(
@@ -329,33 +374,15 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             }
           },
         );
+      } else if (nfcTagScanningReason === 'expense') {
+        gotoExpenseScreen(issuanceHistory);
       } else {
-        navigate(routeNames.PrintExpense, {
-          client: {
-            id: issuanceHistory?.Client_id,
-            code: issuanceHistory?.clientCode,
-            name: issuanceHistory?.clientName,
-          },
-          paybackPeriod: issuanceHistory?.paybackPeriod,
-          maxAmount: parseFloat(
-            nfcTagScanningReason === 'expense'
-              ? issuanceHistory?.Balance
-              : issuanceHistory?.Amount,
-          ),
-          cardId: cardNumber,
-          pinCode: issuanceHistory?.Pincode,
-          issuanceHistoryId: issuanceHistory?.id,
-          paymentType: nfcTagScanningReason,
-        });
+        openRetourDialog();
       }
     } else {
       showToast('Please select payback period');
     }
-  }, [
-    selectedPaybackPeriod,
-    issuanceHistoriesRef.current,
-    nfcTagScanningReason,
-  ]);
+  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber]);
 
   const onTryAgainPressed = useCallback(() => {
     readTag();
@@ -519,6 +546,20 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         </View>
       </BottomModal>
       <Loader visible={loaderLoading} />
+      <Dialog.Container visible={isRetourDialogShown}>
+        <Dialog.Title>
+          <Text style={styles.retourDialogTitleText}>Retour</Text>
+        </Dialog.Title>
+        <Dialog.Description style={{color: 'red'}}>
+          This is meant for refund only,do not use for normal transactions.
+        </Dialog.Description>
+        <Dialog.Button
+          label="Cancel"
+          color={Colors.red}
+          onPress={closeRetourDialog}
+        />
+        <Dialog.Button label="Continue" onPress={onContinueToExpressScreen} />
+      </Dialog.Container>
     </ScreenContainer>
   );
 };
@@ -606,6 +647,9 @@ const styles = StyleSheet.create({
   },
   selectPaybackPeriodModalNextBtn: {
     width: '60%',
+  },
+  retourDialogTitleText: {
+    color: Colors.black,
   },
 });
 
