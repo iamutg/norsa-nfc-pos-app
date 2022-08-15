@@ -1,6 +1,11 @@
 import {AppMode} from '~/types';
 
-export const BASE_URL = 'https://norsabackend.herokuapp.com/api/';
+const isDev = true;
+
+const DEV_BASE_URL = 'https://norsa-backend-demo.herokuapp.com/api/';
+const PROD_BASE_URL = 'https://norsabackend.herokuapp.com/api/';
+
+export const BASE_URL = isDev ? DEV_BASE_URL : PROD_BASE_URL;
 
 export const authEndpoints = {
   login: 'auth/login',
