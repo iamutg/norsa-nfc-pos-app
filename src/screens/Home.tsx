@@ -305,17 +305,10 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     [],
   );
 
-  const onContinueToExpressScreen = useCallback(() => {
+  const onContinuePressed = useCallback(() => {
     closeRetourDialog();
-
-    const paybackPeriodIndex = issuanceHistoriesRef.current?.findIndex(
-      issuanceHistory =>
-        `${issuanceHistory.paybackPeriod}` === selectedPaybackPeriod,
-    );
-    const issuanceHistory = issuanceHistoriesRef.current[paybackPeriodIndex];
-
-    gotoExpenseScreen(issuanceHistory);
-  }, [selectedPaybackPeriod]);
+    onScanNfcForRetourPressed();
+  }, []);
 
   const gotoExpenseScreen = useCallback(
     (issuanceHistory: IssuanceHistory) => {
@@ -374,10 +367,8 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             }
           },
         );
-      } else if (nfcTagScanningReason === 'expense') {
-        gotoExpenseScreen(issuanceHistory);
       } else {
-        openRetourDialog();
+        gotoExpenseScreen(issuanceHistory);
       }
     } else {
       showToast('Please select payback period');
@@ -427,7 +418,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Button
             title="Retour"
             style={styles.scanNfcBtn}
-            onPress={onScanNfcForRetourPressed}
+            onPress={openRetourDialog}
           />
         </>
       );
@@ -558,7 +549,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           color={Colors.red}
           onPress={closeRetourDialog}
         />
-        <Dialog.Button label="Continue" onPress={onContinueToExpressScreen} />
+        <Dialog.Button label="Continue" onPress={onContinuePressed} />
       </Dialog.Container>
     </ScreenContainer>
   );
