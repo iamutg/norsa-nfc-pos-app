@@ -47,7 +47,7 @@ import {useModalState} from '~/hooks';
 import {routeNames} from '~/navigation/routeNames';
 import {Colors} from '~/styles';
 import {
-  HomeScreenNavProp,
+  HomeScreenProp,
   IssuanceHistory,
   NfcTagOperationStatus,
   NfcTagScanningReason,
@@ -64,9 +64,7 @@ import {printText} from './../core/ReceiptPrinter';
 const testCardNumber = 'K-0035';
 console.log('Test Card Number: ', testCardNumber);
 
-export interface Props {
-  navigation: HomeScreenNavProp;
-}
+export interface Props extends HomeScreenProp {}
 
 const Home: FC<Props> = ({navigation: {navigate}}) => {
   const {loginData} = useAuthContext();
@@ -310,6 +308,12 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     onScanNfcForRetourPressed();
   }, []);
 
+  const gotoSelectMerchantIdScreen = () => {
+    navigate(routeNames.SelectMerchantId, {
+      fromHomeScreen: true,
+    });
+  };
+
   const gotoExpenseScreen = useCallback(
     (issuanceHistory: IssuanceHistory) => {
       navigate(routeNames.PrintExpense, {
@@ -465,6 +469,11 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
+          <Button
+            title="Change merchant"
+            style={styles.scanNfcBtn}
+            onPress={gotoSelectMerchantIdScreen}
+          />
           {renderButtons()}
           <Button
             loading={printPreviousReceiptLoading}

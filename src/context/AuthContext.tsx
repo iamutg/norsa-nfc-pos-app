@@ -23,6 +23,7 @@ const useAuthContext: () => AuthContextValue = () => {
 const Provider: FC<EmptyProps> = ({children}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [merchantIdSelected, setMerchantIdSelected] = React.useState(false);
   const [loginData, setLoginData] = useState<LoginData | null>(null);
 
   const login: (
@@ -32,6 +33,7 @@ const Provider: FC<EmptyProps> = ({children}) => {
     await doLogin(email, password);
 
   const logout: () => Promise<void> = async () => {
+    setMerchantIdSelected(false);
     setIsLoggedIn(false);
     setLoginData(null);
     await clearLoginData();
@@ -42,7 +44,25 @@ const Provider: FC<EmptyProps> = ({children}) => {
   ) => Promise<void> = async loginData => {
     await setLoginDataInLocalStorage(loginData);
     setLoginData(loginData);
-    setIsLoggedIn(true);
+
+    if (loginData.Merchant_Group?.length > 0) {
+      setIsLoggedIn(true);
+    } else {
+      setMerchantIdSelected(!!loginData.Merchant_ID);
+      setIsLoggedIn(true);
+    }
+  };
+
+  const onSelectMerchantId = async (merchantId: string) => {
+    const newLoginData: LoginData = {...loginData};
+    newLoginData.Merchant_ID = merchantId;
+    newLoginData.name = newLoginData.Merchant_Group?.find(
+      mer => mer.Id === merchantId,
+    )?.Name;
+
+    setLoginData(newLoginData);
+    setMerchantIdSelected(true);
+    await setLoginDataInLocalStorage(newLoginData);
   };
 
   const checkUserSession: () => Promise<void> = async () => {
@@ -53,6 +73,7 @@ const Provider: FC<EmptyProps> = ({children}) => {
 
       if (!hasTokenExpired) {
         setLoginData(loginData);
+        setMerchantIdSelected(!!loginData.Merchant_ID);
         setIsLoading(false);
         setIsLoggedIn(true);
       } else {
@@ -61,6 +82,7 @@ const Provider: FC<EmptyProps> = ({children}) => {
       }
     } else {
       setLoginData(null);
+      setMerchantIdSelected(false);
       setIsLoading(false);
       setIsLoggedIn(false);
     }
@@ -71,10 +93,12 @@ const Provider: FC<EmptyProps> = ({children}) => {
       value={{
         isLoading,
         isLoggedIn,
+        merchantIdSelected,
         loginData,
         login,
         logout,
         onLoginSuccess,
+        onSelectMerchantId,
         checkUserSession,
       }}>
       {children}
