@@ -290,7 +290,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
 
     setDailyReceiptPrintLoading(false);
-  }, []);
+  }, [loginData]);
 
   const onPrintDailyReceiptPressed = useCallback(async () => {
     await printDailyReport();
@@ -377,7 +377,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     } else {
       showToast('Please select payback period');
     }
-  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber]);
+  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber, loginData]);
 
   const onTryAgainPressed = useCallback(() => {
     readTag();
