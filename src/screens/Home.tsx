@@ -47,7 +47,7 @@ import {useModalState} from '~/hooks';
 import {routeNames} from '~/navigation/routeNames';
 import {Colors} from '~/styles';
 import {
-  HomeScreenNavProp,
+  HomeScreenProp,
   IssuanceHistory,
   NfcTagOperationStatus,
   NfcTagScanningReason,
@@ -64,9 +64,7 @@ import {printText} from './../core/ReceiptPrinter';
 const testCardNumber = '0002';
 console.log('Test Card Number: ', testCardNumber);
 
-export interface Props {
-  navigation: HomeScreenNavProp;
-}
+export interface Props extends HomeScreenProp {}
 
 const Home: FC<Props> = ({navigation: {navigate}}) => {
   const {loginData} = useAuthContext();
@@ -292,7 +290,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
 
     setDailyReceiptPrintLoading(false);
-  }, []);
+  }, [loginData]);
 
   const onPrintDailyReceiptPressed = useCallback(async () => {
     await printDailyReport();
@@ -309,6 +307,12 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     closeRetourDialog();
     onScanNfcForRetourPressed();
   }, []);
+
+  const gotoSelectMerchantIdScreen = () => {
+    navigate(routeNames.SelectMerchantId, {
+      fromHomeScreen: true,
+    });
+  };
 
   const gotoExpenseScreen = useCallback(
     (issuanceHistory: IssuanceHistory) => {
@@ -373,7 +377,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     } else {
       showToast('Please select payback period');
     }
-  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber]);
+  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber, loginData]);
 
   const onTryAgainPressed = useCallback(() => {
     readTag();
@@ -465,6 +469,11 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
+          <Button
+            title="Change merchant"
+            style={styles.scanNfcBtn}
+            onPress={gotoSelectMerchantIdScreen}
+          />
           {renderButtons()}
           <Button
             loading={printPreviousReceiptLoading}

@@ -53,6 +53,21 @@ export const getLoginData: () => Promise<LoginData | null> = async () => {
   }
 };
 
+export const getMerchantId = async () => {
+  try {
+    const merchantId = await AsyncStorage.getItem(asyncStorageKeys.merchantId);
+
+    if (merchantId) {
+      return merchantId;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.log('Error getting merchant id from async storage', error);
+    return null;
+  }
+};
+
 export const getAuthToken: () => Promise<string> = async () => {
   const loginData = await getLoginData();
 
@@ -69,6 +84,14 @@ export const setLoginData: (
     );
   } catch (error) {
     console.log('Error setting login data', error);
+  }
+};
+
+export const setMerchantId = async (merchantId: string) => {
+  try {
+    await AsyncStorage.setItem(asyncStorageKeys.merchantId, merchantId);
+  } catch (error) {
+    console.log('Error setting merchant id', error);
   }
 };
 

@@ -1,14 +1,11 @@
 import React, {FC, useEffect} from 'react';
-import {Image, StyleSheet, Text, View} from 'react-native';
-import {
-  responsiveFontSize,
-  responsiveWidth,
-} from 'react-native-responsive-dimensions';
-import {Icons, ScreenContainer} from '~/components';
+import {Image, StyleSheet} from 'react-native';
+import {responsiveWidth} from 'react-native-responsive-dimensions';
+import {logo} from '~/assets/images';
+import {ScreenContainer} from '~/components';
+import {useAuthContext} from '~/context/AuthContext';
 import {Colors} from '~/styles';
 import {EmptyProps} from '~/types';
-import {useAuthContext} from '~/context/AuthContext';
-import {logo} from '~/assets/images';
 
 const Splash: FC<EmptyProps> = () => {
   const {checkUserSession} = useAuthContext();
