@@ -471,7 +471,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
           <Button
-            title="Change merchant"
+            title="Change Kassa"
             style={styles.scanNfcBtn}
             onPress={gotoSelectMerchantIdScreen}
           />
