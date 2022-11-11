@@ -55,10 +55,13 @@ const Provider: FC<EmptyProps> = ({children}) => {
 
   const onSelectMerchantId = async (merchantId: string) => {
     const newLoginData: LoginData = {...loginData};
+
     newLoginData.Merchant_ID = merchantId;
-    newLoginData.name = newLoginData.Merchant_Group?.find(
+    const selectedMerchant = newLoginData.Merchant_Group?.find(
       mer => mer.Id === merchantId,
-    )?.Name;
+    );
+    newLoginData.name = selectedMerchant?.Name;
+    newLoginData.pinCode = selectedMerchant?.pinCode;
 
     setLoginData(newLoginData);
     setMerchantIdSelected(true);
