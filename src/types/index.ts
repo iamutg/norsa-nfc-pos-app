@@ -60,6 +60,8 @@ export type GeneralFailureResponse = {
   message?: string;
 };
 
+export type Merchant = {Name?: string; Id?: string; pinCode?: string};
+
 export type LoginData = {
   id?: string;
   accessToken?: string;
@@ -70,7 +72,7 @@ export type LoginData = {
   name?: string;
   pinCode?: string;
   Merchant_ID?: string;
-  Merchant_Group?: {Name?: string; Id?: string}[];
+  Merchant_Group?: Merchant[];
 };
 
 export type LoginApiRequest = {
