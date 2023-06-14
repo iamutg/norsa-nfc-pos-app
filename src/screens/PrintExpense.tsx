@@ -84,7 +84,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     const transaction: Transaction = {
       Client_id: client.id,
       ItemDescription: paymentType === 'expense' ? 'Expense' : 'Retour',
-      Merchant_ID: loginData?.Merchant_ID,
+      Merchant_ID: loginData?.id,
       issuancehistoryId: issuanceHistoryId,
       dateTime: moment().utc().toDate().toUTCString(),
       AmountUser: price,

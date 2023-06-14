@@ -47,7 +47,7 @@ import {useModalState} from '~/hooks';
 import {routeNames} from '~/navigation/routeNames';
 import {Colors} from '~/styles';
 import {
-  HomeScreenProp,
+  HomeScreenNavProp,
   IssuanceHistory,
   NfcTagOperationStatus,
   NfcTagScanningReason,
@@ -64,7 +64,9 @@ import {printText} from './../core/ReceiptPrinter';
 const testCardNumber = 'K-0035';
 console.log('Test Card Number: ', testCardNumber);
 
-export interface Props extends HomeScreenProp {}
+export interface Props {
+  navigation: HomeScreenNavProp;
+}
 
 const Home: FC<Props> = ({navigation: {navigate}}) => {
   const {loginData} = useAuthContext();
@@ -151,7 +153,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
 
     const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(
       cardNumber,
-      loginData.Merchant_ID,
     );
     console.log('Issucance Histories: ', issuanceHistoriesRes?.data);
 
@@ -179,7 +180,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       setPaybackPeriods(paybackPickerItems);
       showSelectPaybackPeriodModal();
     }
-  }, [cardNumber, loginData]);
+  }, [cardNumber]);
 
   const showBottomModal = useCallback(async () => {
     try {
@@ -267,7 +268,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   const printDailyReport = useCallback(async () => {
     setDailyReceiptPrintLoading(true);
 
-    const apiResponse = await doGetDailyTransactions(loginData.Merchant_ID);
+    const apiResponse = await doGetDailyTransactions();
 
     if (apiResponse.data) {
       const currentTimestamp = getLocalTimestamp(getCurrentUtcTimestamp());
@@ -291,7 +292,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
 
     setDailyReceiptPrintLoading(false);
-  }, [loginData]);
+  }, []);
 
   const onPrintDailyReceiptPressed = useCallback(async () => {
     await printDailyReport();
@@ -308,12 +309,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     closeRetourDialog();
     onScanNfcForRetourPressed();
   }, []);
-
-  const gotoSelectMerchantIdScreen = () => {
-    navigate(routeNames.SelectMerchantId, {
-      fromHomeScreen: true,
-    });
-  };
 
   const gotoExpenseScreen = useCallback(
     (issuanceHistory: IssuanceHistory) => {
@@ -378,7 +373,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     } else {
       showToast('Please select payback period');
     }
-  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber, loginData]);
+  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber]);
 
   const onTryAgainPressed = useCallback(() => {
     readTag();
@@ -470,11 +465,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
-          <Button
-            title="Change Kassa"
-            style={styles.scanNfcBtn}
-            onPress={gotoSelectMerchantIdScreen}
-          />
           {renderButtons()}
           <Button
             loading={printPreviousReceiptLoading}

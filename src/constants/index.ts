@@ -1,6 +1,6 @@
 import {AppMode} from '~/types';
 
-const isDev = false;
+const isDev = true;
 
 const DEV_BASE_URL = 'https://norsa-backend-demo.herokuapp.com/api/';
 const PROD_BASE_URL = 'https://norsabackend.herokuapp.com/api/';
@@ -18,8 +18,7 @@ export const mainEndpoints = {
   createTransactionHistory: 'transactionHistory/createTransactionHistory',
   getMerchantId: (userId: string) =>
     `auth/getMerchantIdForLoggedInUser/${userId}`,
-  getDailyTransactions: (merchantId: string) =>
-    `transactionHistory/getMerchantsTodaysTransactions?merchantId=${merchantId}`,
+  getDailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
   getMerchantName: 'merchants/getMerchantNameByUserId',
   getDailySalesPrintCheck: (merchantId: string) =>
     `dailySalesPrintCheck/getByMerchantId/${merchantId}`,
@@ -29,10 +28,9 @@ export const mainEndpoints = {
 
 export const asyncStorageKeys = {
   loginData: 'KEY_LOGIN_DATA',
-  merchantId: 'MERCHANT_ID',
   dailyReportPrintedDate: 'KEY_DAILY_REPORT_PRRINTED_DATE',
   printerDefaultConfig: 'KEY_PRINTER_DEFAULT_CONFIG',
   previousPrintedReceipt: 'KEY_PREVIOUS_PRINTED_RECEIPT',
 };
 
-export const appModes: AppMode = 'retour';
+export const appModes: AppMode = 'expense-retour';
