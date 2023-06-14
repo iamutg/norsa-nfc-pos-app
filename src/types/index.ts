@@ -72,7 +72,6 @@ export type LoginData = {
   name?: string;
   pinCode?: string;
   Merchant_ID?: string;
-  Merchant_Group?: Merchant[];
 };
 
 export type LoginApiRequest = {
@@ -279,12 +278,10 @@ export type PostDailySalesPrintCheckResponse =
 export type AuthContext = {
   isLoading: boolean;
   isLoggedIn: boolean;
-  merchantIdSelected: boolean;
   loginData: LoginData | null;
   login: (email: string, password: string) => Promise<LoginResponse>;
   logout: () => Promise<void>;
-  onLoginSuccess: (data: LoginData) => Promise<void>;
-  onSelectMerchantId: (merchantId: string) => Promise<void>;
+  onLoginSuccess: (data: LoginData) => void;
   checkUserSession: () => Promise<void>;
 };
 
@@ -312,23 +309,13 @@ export type MainStackParamList = {
     issuanceHistoryId: string;
     paymentType: NfcTagScanningReason;
   };
-  [routeNames.SelectMerchantId]: {fromHomeScreen: boolean};
 };
 
 export type RootStackParamList = SplashStackParamList &
   AuthStackParamList &
-  MainStackParamList & {
-    [routeNames.RootSelectMerchantId]: {
-      fromHomeScreen?: boolean;
-    };
-  };
+  MainStackParamList;
 
-export type SelectMerchantIdScreenProp = StackScreenProps<
-  MainStackParamList,
-  routeNames.SelectMerchantId
->;
-
-export type HomeScreenProp = StackScreenProps<
+export type HomeScreenNavProp = StackNavigationProp<
   MainStackParamList,
   routeNames.Home
 >;

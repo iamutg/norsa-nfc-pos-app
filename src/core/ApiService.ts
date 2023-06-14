@@ -65,19 +65,17 @@ export const doLogin = async (
       LoginApiRequest
     >(authEndpoints.login, {email, password});
 
-    const data = response.data?.data;
+    const merchantNameApiRes = await axios.get<
+      MerchantNameApiResponse,
+      AxiosResponse<MerchantNameApiResponse>
+    >(mainEndpoints.getMerchantName, {
+      headers: {
+        Authorization: `Bearer ${response.data?.data?.accessToken}`,
+      },
+    });
 
-    if (data.Merchant_ID) {
-      const merchantNameApiRes = await axios.get<
-        MerchantNameApiResponse,
-        AxiosResponse<MerchantNameApiResponse>
-      >(mainEndpoints.getMerchantName, {
-        headers: {
-          Authorization: `Bearer ${response.data?.data?.accessToken}`,
-        },
-      });
-      data.name = merchantNameApiRes.data?.Name;
-    }
+    const data = response.data?.data;
+    data.name = merchantNameApiRes.data?.Name;
 
     return {
       data,
