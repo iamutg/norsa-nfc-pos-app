@@ -18,8 +18,7 @@ export const mainEndpoints = {
   createTransactionHistory: 'transactionHistory/createTransactionHistory',
   getMerchantId: (userId: string) =>
     `auth/getMerchantIdForLoggedInUser/${userId}`,
-  getDailyTransactions: (merchantId: string) =>
-    `transactionHistory/getMerchantsTodaysTransactions?merchantId=${merchantId}`,
+  getDailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
   getMerchantName: 'merchants/getMerchantNameByUserId',
   getDailySalesPrintCheck: (merchantId: string) =>
     `dailySalesPrintCheck/getByMerchantId/${merchantId}`,

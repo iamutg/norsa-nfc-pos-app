@@ -153,7 +153,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
 
     const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(
       cardNumber,
-      loginData.Merchant_ID,
     );
     console.log('Issucance Histories: ', issuanceHistoriesRes?.data);
 
@@ -181,7 +180,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       setPaybackPeriods(paybackPickerItems);
       showSelectPaybackPeriodModal();
     }
-  }, [cardNumber, loginData]);
+  }, [cardNumber]);
 
   const showBottomModal = useCallback(async () => {
     try {
@@ -269,7 +268,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   const printDailyReport = useCallback(async () => {
     setDailyReceiptPrintLoading(true);
 
-    const apiResponse = await doGetDailyTransactions(loginData.Merchant_ID);
+    const apiResponse = await doGetDailyTransactions();
 
     if (apiResponse.data) {
       const currentTimestamp = getLocalTimestamp(getCurrentUtcTimestamp());

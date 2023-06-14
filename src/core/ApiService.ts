@@ -153,11 +153,7 @@ export const doGetIssuanceHistory: (
 
 export const doGetMultipleIssuanceHistories: (
   cardId: string,
-  merchantId?: string,
-) => Promise<GetMultipleIssuanceHistoriesResponse> = async (
-  cardId,
-  merchantId,
-) => {
+) => Promise<GetMultipleIssuanceHistoriesResponse> = async cardId => {
   try {
     const axios = await getAxiosInstanceWithAuthHeader();
 
@@ -170,7 +166,6 @@ export const doGetMultipleIssuanceHistories: (
       GetIssuanceHistoryApiRequest
     >(mainEndpoints.getMultipleIssuanceHistories, {
       nfcCardId: cardId,
-      merchantId,
     });
 
     if (response.data?.data) {
@@ -293,34 +288,33 @@ export const doCreateTrasactionHistory: (
   }
 };
 
-export const doGetDailyTransactions: (
-  merchantId: string,
-) => Promise<GetDailyTransactionsResponse> = async merchantId => {
-  try {
-    const axios = await getAxiosInstanceWithAuthHeader();
+export const doGetDailyTransactions: () => Promise<GetDailyTransactionsResponse> =
+  async () => {
+    try {
+      const axios = await getAxiosInstanceWithAuthHeader();
 
-    const response = await axios.get<
-      GetDailyTransactionsApiResponse,
-      AxiosResponse<GetDailyTransactionsApiResponse>
-    >(mainEndpoints.getDailyTransactions(merchantId));
+      const response = await axios.get<
+        GetDailyTransactionsApiResponse,
+        AxiosResponse<GetDailyTransactionsApiResponse>
+      >(mainEndpoints.getDailyTransactions);
 
-    if (response.data?.message === 'success') {
-      return {
-        data: response.data?.data,
-      };
-    } else {
+      if (response.data?.message === 'success') {
+        return {
+          data: response.data?.data,
+        };
+      } else {
+        return {
+          message: 'Something went wrong',
+        };
+      }
+    } catch (error) {
+      console.log('Error getting daily transactions', error);
+
       return {
         message: 'Something went wrong',
       };
     }
-  } catch (error) {
-    console.log('Error getting daily transactions', error);
-
-    return {
-      message: 'Something went wrong',
-    };
-  }
-};
+  };
 
 export const doGetDailySalesPrintCheck: (
   merchantId: string,

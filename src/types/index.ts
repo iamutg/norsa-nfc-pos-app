@@ -110,7 +110,6 @@ export type IssuanceHistory = {
 
 export type GetIssuanceHistoryApiRequest = {
   nfcCardId: string;
-  merchantId?: string;
 };
 
 export type GetIssuanceHistoryApiResponse = {
