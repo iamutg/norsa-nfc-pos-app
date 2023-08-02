@@ -152,9 +152,14 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     );
     console.log('Issucance Histories: ', issuanceHistoriesRes?.data);
 
+    setLoaderLoading(false);
+
     if (issuanceHistoriesRes.message) {
-      setLoaderLoading(false);
       showToast(issuanceHistoriesRes?.message);
+    } else if (issuanceHistoriesRes?.data?.length === 0) {
+      showToast(
+        'This person has not applied for a transaction, Please contact dealer.',
+      );
     } else {
       const paybackPickerItems: Array<PickerItem> =
         issuanceHistoriesRes?.data?.map(issuanceHistory => ({
@@ -170,7 +175,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           ?.sort?.((a, b) => a - b)?.[0]
       }`;
 
-      setLoaderLoading(false);
       issuanceHistoriesRef.current = issuanceHistoriesRes?.data;
       setSelectedPaybackPeriod(smallestPaybackPeriod);
       setPaybackPeriods(paybackPickerItems);
