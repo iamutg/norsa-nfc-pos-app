@@ -33,4 +33,4 @@ export const asyncStorageKeys = {
   previousPrintedReceipt: 'KEY_PREVIOUS_PRINTED_RECEIPT',
 };
 
-export const appModes: AppMode = 'expense-retour';
+export const appModes: AppMode = 'expense';
