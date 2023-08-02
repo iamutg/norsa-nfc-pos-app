@@ -158,7 +158,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       showToast(issuanceHistoriesRes?.message);
     } else if (issuanceHistoriesRes?.data?.length === 0) {
       showToast(
-        'This person has not applied for a transaction, Please contact dealer.',
+        'This person has not applied to perform a transaction, Please contact your dealer',
       );
     } else {
       const paybackPickerItems: Array<PickerItem> =
