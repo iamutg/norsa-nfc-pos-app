@@ -467,12 +467,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Image source={logo} style={styles.logo} />
           {renderButtons()}
           <Button
-            loading={printPreviousReceiptLoading}
-            title="Print Previous Receipt"
-            style={styles.scanNfcBtn}
-            onPress={onPrintPreviousPrintedReceipt}
-          />
-          <Button
             title="Show Balance"
             style={styles.scanNfcBtn}
             onPress={onScanNfcForBalance}
