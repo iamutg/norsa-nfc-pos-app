@@ -94,32 +94,10 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   const issuanceHistoriesRef = useRef<Array<IssuanceHistory> | null>(null);
 
   useEffect(() => {
-    (async () => {
-      try {
-        await initNfcManager();
-        console.log('Nfc Manager Init');
-
-        const _printDate = await getDailyReportPrintedDate();
-        console.log('Daily report printDate: ', _printDate);
-
-        if (_printDate === null) {
-          await printDailyReport();
-        } else {
-          const printDate = moment(_printDate);
-          const currentDate = moment();
-          const time = moment('00:00:00', 'HH:mm:ss');
-
-          if (
-            currentDate.isAfter(printDate, 'day') &&
-            currentDate.isSameOrAfter(time, 'second')
-          ) {
-            await printDailyReport();
-          }
-        }
-      } catch (error) {
-        console.log('Error Initializing Nfc Manager');
-      }
-    })();
+    initNfcManager().catch(error =>
+      console.log('Error initializing nfc manager', error),
+    );
+    shouldPrintDailyReceipt();
   }, []);
 
   useEffect(() => {
@@ -127,6 +105,24 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       onReadNfcTagSuccess();
     }
   }, [scanningStatus]);
+
+  const shouldPrintDailyReceipt = async () => {
+    const _printDate = await getDailyReportPrintedDate();
+    console.log('Daily report printDate: ', _printDate);
+
+    if (_printDate) {
+      const printDate = moment(_printDate);
+      const currentDate = moment();
+      const time = moment('00:00:00', 'HH:mm:ss');
+
+      if (
+        currentDate.isAfter(printDate, 'day') &&
+        currentDate.isSameOrAfter(time, 'second')
+      ) {
+        await printDailyReport();
+      }
+    }
+  };
 
   const readTag = useCallback(async () => {
     try {

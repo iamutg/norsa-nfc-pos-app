@@ -124,7 +124,6 @@ export const printDailyReceipt: (
     '[L]+5999 767-1563';
 
   console.log(textToBePrinted);
-  await setPreviousPrintedReceipt(textToBePrinted);
 
   await print(textToBePrinted);
 };
@@ -174,7 +173,6 @@ export const printBalance: (
     '[L]+5999 767-1563';
 
   console.log(textToBePrinted);
-  await setPreviousPrintedReceipt(textToBePrinted);
 
   await print(textToBePrinted);
 };
