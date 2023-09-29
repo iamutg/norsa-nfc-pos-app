@@ -14,7 +14,7 @@ export const printerDefaultConfig: PrinterConfig = {
   printerNbrCharactersPerLine: 30,
 };
 
-export const noop: () => void = () => {};
+export const noop = () => {};
 
 export const showToast: (message: string, duration?: number) => void = (
   message,
