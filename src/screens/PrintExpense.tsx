@@ -214,9 +214,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
   };
 
   const onPrintExpenseReceipt = (price: number) => {
-    if (paymentType === 'retour') {
-      printExpenseReceipt(price);
-    } else if (haveShownBalanceRef.current) {
+    if (haveShownBalanceRef.current) {
       printExpenseReceipt(price);
     } else {
       showBalance(price);
