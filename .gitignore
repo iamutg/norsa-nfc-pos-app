@@ -23,6 +23,7 @@ DerivedData
 
 # Android/IntelliJ
 #
+android/app/src/main/res/raw
 build/
 .idea
 .gradle
@@ -49,12 +50,30 @@ buck-out/
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/
 
-*/fastlane/report.xml
-*/fastlane/Preview.html
-*/fastlane/screenshots
+# fastlane specific
+**/fastlane/report.xml
+
+# deliver temporary files
+**/fastlane/Preview.html
+
+# snapshot generated screenshots
+**/fastlane/screenshots
+
+# scan temporary files
+**/fastlane/test_output
+
+# Env files
+**/fastlane/.env.*
+!**/fastlane/.env.sample.default
+
+# Bundle artifact
+*.jsbundle
+*.android.bundle
+
+# Ruby / CocoaPods
+/ios/Pods/
+/vendor/bundle/
 
 # Bundle artifact
 *.jsbundle
 
-# CocoaPods
-/ios/Pods/

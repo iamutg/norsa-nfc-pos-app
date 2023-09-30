@@ -54,7 +54,9 @@ export const printReceipt: (
     `[L]\n` +
     `[L]Thank you for your purchase\n` +
     `[L]For questions or inquiries call customer service:\n` +
-    '[L]+5999 767-1563';
+    '[L]+5999 767-1563\n' +
+    `[C]------------------------------\n` +
+    `[C]<b>No Cash Refunds</b>`;
 
   console.log(textToBePrinted);
   await setPreviousPrintedReceipt(textToBePrinted);
