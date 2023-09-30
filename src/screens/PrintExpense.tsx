@@ -9,7 +9,10 @@ import {
 import {Button, Header} from '~/components';
 import BottomModal from '~/components/BottomModal';
 import {useAuthContext} from '~/context/AuthContext';
-import {doCreateTrasactionHistory} from '~/core/ApiService';
+import {
+  doCreateTrasactionHistory,
+  doGetMultipleIssuanceHistories,
+} from '~/core/ApiService';
 import {printReceipt} from '~/core/ReceiptPrinter';
 import {Colors} from '~/styles';
 import {
@@ -18,7 +21,13 @@ import {
   Transaction,
   TransactionType,
 } from '~/types';
-import {isValidAmount, showAlert, showToast} from '~/utils';
+import {
+  isValidAmount,
+  noop,
+  showAlert,
+  showAlertWithTwoButtons,
+  showToast,
+} from '~/utils';
 
 const merchantPinCodeModalText = 'Please Enter the Merchant Pin code';
 const defaultPinCodeModalText = 'Please Enter the Pin Code to Verify Nfc Card';
@@ -39,12 +48,15 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
   const [isConfirmationModalShown, setIsConfirmationModalShown] =
     useState(false);
 
+  const haveShownBalanceRef = React.useRef(false);
+
   const client: Client = route.params?.client;
   const maxAmount = route.params?.maxAmount;
   const issuanceHistoryId = route.params?.issuanceHistoryId;
   const pinCodeToVerify = route.params?.pinCode;
   const paybackPeriod = route.params?.paybackPeriod;
   const paymentType = route.params?.paymentType;
+  const cardId = route.params?.cardId ?? '';
 
   const getModalText = useCallback(() => {
     if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
@@ -115,62 +127,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const onSubmitButtonPressed = useCallback(async () => {
-    if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
-      if (pinCode === loginData?.pinCode) {
-        setHasMerchantPincodeVerified(true);
-        setPinCode('');
-      } else {
-        showToast('Pin Code entered is incorrect');
-      }
-    } else {
-      if (pinCode === pinCodeToVerify) {
-        setHasPinCodeVerified(true);
-        hideConfirmationModal();
-
-        setLoading(true);
-        const price = parseFloat(expensePrice.trim());
-
-        await printForMerchant(price);
-      } else {
-        showToast('Pin Code entered is incorrect');
-      }
-    }
-  }, [pinCode, paymentType, hasMerchantPincodeVerified]);
-
-  const onSaveAndPrintReceiptPressed = useCallback(async () => {
-    Keyboard.dismiss();
-
-    const _expensePrice = expensePrice.trim();
-
-    if (_expensePrice === '') {
-      showAlert('Empty Expense Amount', 'Expense Amount cannot be empty');
-      return;
-    }
-
-    if (!isValidAmount(_expensePrice) || parseFloat(_expensePrice) === 0) {
-      showAlert(
-        'Invalid Amount',
-        'Expense Amount entered is invalid. Only numbers greater than 0 and upto 2 decimal places are allowed',
-      );
-      return;
-    }
-
-    const price = parseFloat(_expensePrice);
-
-    if (price <= 0) {
-      showAlert('Invalid Amount', 'Please enter a valid amount');
-      return;
-    }
-
-    if (price > maxAmount) {
-      showAlert(
-        'Limit Reached',
-        'The amount entered exceeds the maximum amount',
-      );
-      return;
-    }
-
+  const printExpenseReceipt = async (price: number) => {
     try {
       if (!hasPinCodeVerified) {
         showConfirmationModal();
@@ -208,7 +165,99 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
       console.log('Error printing Receipt: ', error);
       showAlert('Error Printing', error?.message || 'Something went wrong');
     }
-  }, [expensePrice, hasPrintedForMerchant, hasPinCodeVerified]);
+  };
+
+  const showBalance = async (price: number) => {
+    setLoading(true);
+    const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(cardId);
+    const issuanceHistory = issuanceHistoriesRes.data?.find(
+      issuanceHistory => issuanceHistory.paybackPeriod === paybackPeriod,
+    );
+    setLoading(false);
+
+    showAlertWithTwoButtons(
+      'Balance',
+      `Current balance is ${
+        issuanceHistory.Balance ?? 0
+      }. Do you wish to continue the transaction`,
+      'NO',
+      'YES',
+      noop,
+      () => {
+        haveShownBalanceRef.current = true;
+        printExpenseReceipt(price);
+      },
+    );
+  };
+
+  const onSubmitButtonPressed = async () => {
+    if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
+      if (pinCode === loginData?.pinCode) {
+        setHasMerchantPincodeVerified(true);
+        setPinCode('');
+      } else {
+        showToast('Pin Code entered is incorrect');
+      }
+    } else {
+      if (pinCode === pinCodeToVerify) {
+        setHasPinCodeVerified(true);
+        hideConfirmationModal();
+
+        setLoading(true);
+        const price = parseFloat(expensePrice.trim());
+
+        await printForMerchant(price);
+      } else {
+        showToast('Pin Code entered is incorrect');
+      }
+    }
+  };
+
+  const onPrintExpenseReceipt = (price: number) => {
+    if (paymentType === 'retour') {
+      printExpenseReceipt(price);
+    } else if (haveShownBalanceRef.current) {
+      printExpenseReceipt(price);
+    } else {
+      showBalance(price);
+    }
+  };
+
+  const onSaveAndPrintReceiptPressed = () => {
+    Keyboard.dismiss();
+
+    const _expensePrice = expensePrice.trim();
+
+    if (_expensePrice === '') {
+      showAlert('Empty Expense Amount', 'Expense Amount cannot be empty');
+      return;
+    }
+
+    if (!isValidAmount(_expensePrice) || parseFloat(_expensePrice) === 0) {
+      showAlert(
+        'Invalid Amount',
+        'Expense Amount entered is invalid. Only numbers greater than 0 and upto 2 decimal places are allowed',
+      );
+      return;
+    }
+
+    const price = parseFloat(_expensePrice);
+
+    if (price <= 0) {
+      showAlert('Invalid Amount', 'Please enter a valid amount');
+      return;
+    }
+
+    if (price > maxAmount) {
+      showAlert(
+        'Limit Reached',
+        'The amount entered exceeds the maximum amount',
+      );
+      return;
+    }
+
+    onPrintExpenseReceipt(price);
+  };
 
   return (
     <>
