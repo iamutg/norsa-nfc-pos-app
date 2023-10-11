@@ -14,3 +14,4 @@ const Icons = {
 };
 
 export {Icons, ScreenContainer, Button, Header, Loader, BottomModal};
+export * from './BalanceDialog';
