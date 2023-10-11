@@ -10,7 +10,7 @@ export interface BalanceDialogProps {
   negativeButtonColor?: ColorValue;
   posititveButtonText: string;
   onNegativeButtonPress?: () => void;
-  onPositiveButtonPress: () => void;
+  onPositiveButtonPress?: () => void;
   closeDialog: () => void;
 }
 
@@ -28,6 +28,10 @@ export function BalanceDialog({
     closeDialog();
     onNegativeButtonPress?.();
   };
+  const onPositiveButtonPressed = () => {
+    closeDialog();
+    onPositiveButtonPress?.();
+  };
 
   return (
     <Dialog.Container visible={visible}>
@@ -44,7 +48,7 @@ export function BalanceDialog({
       />
       <Dialog.Button
         label={posititveButtonText}
-        onPress={onPositiveButtonPress}
+        onPress={onPositiveButtonPressed}
       />
     </Dialog.Container>
   );
@@ -57,7 +61,5 @@ const styles = StyleSheet.create({
   titleText: {
     color: Colors.black,
   },
-  descriptionText: {
-    color: Colors.red,
-  },
+  descriptionText: {},
 });
