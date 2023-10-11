@@ -553,7 +553,8 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             {selectedIssuanceHistory?.clientName} Your balance for card number{' '}
             {cardNumber} is :{' '}
             <Text style={styles.balanceText}>
-              NAFL {parseFloat(selectedIssuanceHistory?.Balance).toFixed(2)}
+              NAFL{' '}
+              {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
             </Text>
           </Text>
         }
