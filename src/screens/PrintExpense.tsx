@@ -6,7 +6,7 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {Button, Header} from '~/components';
+import {BalanceDialog, Button, Header} from '~/components';
 import BottomModal from '~/components/BottomModal';
 import {useAuthContext} from '~/context/AuthContext';
 import {
@@ -14,10 +14,12 @@ import {
   doGetMultipleIssuanceHistories,
 } from '~/core/ApiService';
 import {printReceipt} from '~/core/ReceiptPrinter';
+import {useModalState} from '~/hooks';
 import {Colors} from '~/styles';
 import {
   AddItemsScreeProps,
   Client,
+  IssuanceHistory,
   Transaction,
   TransactionType,
 } from '~/types';
@@ -44,6 +46,11 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     useState(false);
   const [hasPinCodeVerified, setHasPinCodeVerified] = useState(false);
   const [disableInput, setDisableInput] = useState(false);
+  const [selectedIssuanceHistory, setSelectedIssuanceHistory] =
+    React.useState<IssuanceHistory | null>(null);
+  const [balanceDialogShown, showBalanceDialog, hideBalanceDialog] =
+    useModalState();
+
   const [loading, setLoading] = useState(false);
   const [isConfirmationModalShown, setIsConfirmationModalShown] =
     useState(false);
@@ -167,7 +174,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     }
   };
 
-  const showBalance = async (price: number) => {
+  const showBalance = async () => {
     setLoading(true);
     const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(cardId);
     const issuanceHistory = issuanceHistoriesRes.data?.find(
@@ -175,19 +182,8 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     );
     setLoading(false);
 
-    showAlertWithTwoButtons(
-      'Balance',
-      `Current balance is ${
-        issuanceHistory.Balance ?? 0
-      }. Do you wish to continue the transaction`,
-      'NO',
-      'YES',
-      noop,
-      () => {
-        haveShownBalanceRef.current = true;
-        printExpenseReceipt(price);
-      },
-    );
+    setSelectedIssuanceHistory(issuanceHistory);
+    showBalanceDialog();
   };
 
   const onSubmitButtonPressed = async () => {
@@ -217,7 +213,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     if (haveShownBalanceRef.current) {
       printExpenseReceipt(price);
     } else {
-      showBalance(price);
+      showBalance();
     }
   };
 
@@ -255,6 +251,11 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     }
 
     onPrintExpenseReceipt(price);
+  };
+
+  const onContinueTransactionPressed = () => {
+    haveShownBalanceRef.current = true;
+    printExpenseReceipt(parseFloat(expensePrice.trim()));
   };
 
   return (
@@ -332,6 +333,24 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
           />
         </View>
       </BottomModal>
+      <BalanceDialog
+        visible={balanceDialogShown}
+        negativeButtonText="NO"
+        negativeButtonColor={Colors.red}
+        posititveButtonText="YES"
+        closeDialog={hideBalanceDialog}
+        description={
+          <Text>
+            Current balance is{' '}
+            <Text style={styles.balanceText}>
+              NAFL
+              {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
+            </Text>
+            . Do you wish to continue the transaction?
+          </Text>
+        }
+        onPositiveButtonPress={onContinueTransactionPressed}
+      />
     </>
   );
 };
@@ -433,6 +452,10 @@ const styles = StyleSheet.create({
   modalButton: {
     width: '60%',
     alignSelf: 'center',
+  },
+  balanceText: {
+    fontWeight: 'bold',
+    color: Colors.red,
   },
 });
 

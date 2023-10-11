@@ -1,6 +1,6 @@
 import {Picker} from '@react-native-picker/picker';
 import moment from 'moment';
-import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
+import React, {FC, useCallback, useEffect, useRef} from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -24,6 +24,7 @@ import {
   Loader,
   ScreenContainer,
   BottomModal,
+  BalanceDialog,
 } from '~/components';
 import {appModes} from '~/constants';
 import {useAuthContext} from '~/context/AuthContext';
@@ -53,12 +54,7 @@ import {
   NfcTagScanningReason,
   PickerItem,
 } from '~/types';
-import {
-  getCurrentUtcTimestamp,
-  getLocalTimestamp,
-  showPrintBalanceAlert,
-  showToast,
-} from '~/utils';
+import {getCurrentUtcTimestamp, getLocalTimestamp, showToast} from '~/utils';
 import {printText} from './../core/ReceiptPrinter';
 
 const testCardNumber = '0002';
@@ -71,25 +67,31 @@ export interface Props {
 const Home: FC<Props> = ({navigation: {navigate}}) => {
   const {loginData} = useAuthContext();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [dailyReceiptPrintLoading, setDailyReceiptPrintLoading] =
-    useState(false);
+    React.useState(false);
   const [printPreviousReceiptLoading, setPrintPreviousReceiptLoading] =
-    useState(false);
-  const [bottomModalShown, setBottomModalShown] = useState(false);
+    React.useState(false);
+  const [bottomModalShown, setBottomModalShown] = React.useState(false);
   const [selectPaybackPeriodModalShown, setSelectPaybackPeriodModalShown] =
-    useState(false);
+    React.useState(false);
   const [isRetourDialogShown, openRetourDialog, closeRetourDialog] =
     useModalState();
-  const [paybackPeriods, setPaybackPeriods] = useState<Array<PickerItem>>([]);
-  const [selectedPaybackPeriod, setSelectedPaybackPeriod] = useState('');
+  const [paybackPeriods, setPaybackPeriods] = React.useState<Array<PickerItem>>(
+    [],
+  );
+  const [selectedPaybackPeriod, setSelectedPaybackPeriod] = React.useState('');
+  const [selectedIssuanceHistory, setSelectedIssuanceHistory] =
+    React.useState<IssuanceHistory>(null);
   const [scanningStatus, setScanningStatus] =
-    useState<NfcTagOperationStatus>('scanning');
+    React.useState<NfcTagOperationStatus>('scanning');
   const [nfcTagScanningReason, setNfcTagScanningReason] =
-    useState<NfcTagScanningReason>('expense');
-  const [error, setError] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [loaderLoading, setLoaderLoading] = useState(false);
+    React.useState<NfcTagScanningReason>('expense');
+  const [error, setError] = React.useState('');
+  const [cardNumber, setCardNumber] = React.useState('');
+  const [balanceDialogShown, showBalanceDialog, hideBalanceDialog] =
+    useModalState();
+  const [loaderLoading, setLoaderLoading] = React.useState(false);
 
   const issuanceHistoriesRef = useRef<Array<IssuanceHistory> | null>(null);
 
@@ -343,30 +345,8 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       hideSelectPaybackPeriodModal();
 
       if (nfcTagScanningReason === 'balance') {
-        const balance = parseFloat(issuanceHistory?.Balance);
-
-        showPrintBalanceAlert(
-          {balance, cardNumber, customerName: issuanceHistory?.clientName},
-          async () => {
-            try {
-              await printBalance(
-                {
-                  id: issuanceHistory?.Client_id,
-                  code: issuanceHistory?.clientCode,
-                  name: issuanceHistory?.clientName,
-                },
-                cardNumber,
-                loginData?.name,
-                balance,
-                issuanceHistory?.paybackPeriod ?? 0,
-              );
-            } catch (error) {
-              console.log('Error printing Balance');
-
-              showToast(error.message);
-            }
-          },
-        );
+        setSelectedIssuanceHistory(issuanceHistory);
+        showBalanceDialog();
       } else {
         gotoExpenseScreen(issuanceHistory);
       }
@@ -378,6 +358,27 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   const onTryAgainPressed = useCallback(() => {
     readTag();
   }, []);
+
+  const onPrintBalancePressed = async () => {
+    try {
+      const balance = parseFloat(selectedIssuanceHistory?.Balance);
+
+      await printBalance(
+        {
+          id: selectedIssuanceHistory?.Client_id,
+          code: selectedIssuanceHistory?.clientCode,
+          name: selectedIssuanceHistory?.clientName,
+        },
+        cardNumber,
+        loginData?.name,
+        balance,
+        selectedIssuanceHistory?.paybackPeriod ?? 0,
+      );
+    } catch (error) {
+      console.log('Error printing Balance');
+      showToast(error.message);
+    }
+  };
 
   const renderNfcScanning = useCallback(() => {
     return (
@@ -535,7 +536,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         <Dialog.Title>
           <Text style={styles.retourDialogTitleText}>Retour</Text>
         </Dialog.Title>
-        <Dialog.Description style={{color: 'red'}}>
+        <Dialog.Description style={styles.retourDialogText}>
           This is meant for refund only,do not use for normal transactions.
         </Dialog.Description>
         <Dialog.Button
@@ -545,6 +546,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         />
         <Dialog.Button label="Continue" onPress={onContinuePressed} />
       </Dialog.Container>
+      <BalanceDialog
+        visible={balanceDialogShown}
+        description={
+          <Text>
+            {selectedIssuanceHistory?.clientName} Your balance for card number{' '}
+            {cardNumber} is :{' '}
+            <Text style={styles.balanceText}>
+              NAFL{' '}
+              {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
+            </Text>
+          </Text>
+        }
+        negativeButtonText="PRINT"
+        posititveButtonText="OK"
+        closeDialog={hideBalanceDialog}
+        onNegativeButtonPress={onPrintBalancePressed}
+      />
     </ScreenContainer>
   );
 };
@@ -635,6 +653,13 @@ const styles = StyleSheet.create({
   },
   retourDialogTitleText: {
     color: Colors.black,
+  },
+  retourDialogText: {
+    color: Colors.red,
+  },
+  balanceText: {
+    fontWeight: 'bold',
+    color: Colors.red,
   },
 });
 
