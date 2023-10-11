@@ -177,9 +177,9 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
 
     showAlertWithTwoButtons(
       'Balance',
-      `Current balance is ${
-        issuanceHistory.Balance ?? 0
-      }. Do you wish to continue the transaction`,
+      `Current balance is NAFL ${parseFloat(
+        issuanceHistory.Balance ?? '0',
+      ).toFixed(2)}. Do you wish to continue the transaction`,
       'NO',
       'YES',
       noop,
