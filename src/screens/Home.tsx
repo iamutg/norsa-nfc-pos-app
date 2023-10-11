@@ -54,12 +54,7 @@ import {
   NfcTagScanningReason,
   PickerItem,
 } from '~/types';
-import {
-  getCurrentUtcTimestamp,
-  getLocalTimestamp,
-  showPrintBalanceAlert,
-  showToast,
-} from '~/utils';
+import {getCurrentUtcTimestamp, getLocalTimestamp, showToast} from '~/utils';
 import {printText} from './../core/ReceiptPrinter';
 
 const testCardNumber = 'K-0035';
@@ -556,16 +551,16 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         description={
           <Text>
             {selectedIssuanceHistory?.clientName} Your balance for card number{' '}
-            {cardNumber} is : NAFL{' '}
+            {cardNumber} is :{' '}
             <Text style={styles.balanceText}>
-              {parseFloat(selectedIssuanceHistory?.Balance).toFixed(2)}
+              NAFL {parseFloat(selectedIssuanceHistory?.Balance).toFixed(2)}
             </Text>
           </Text>
         }
         negativeButtonText="PRINT"
         posititveButtonText="OK"
         closeDialog={hideBalanceDialog}
-        onPositiveButtonPress={onPrintBalancePressed}
+        onNegativeButtonPress={onPrintBalancePressed}
       />
     </ScreenContainer>
   );
