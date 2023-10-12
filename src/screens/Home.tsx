@@ -458,26 +458,26 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             style={styles.actionButton}
             onPress={onScanNfcPressed}
           />
-          <Button
+          {/* <Button
             title="3. Retour"
             style={styles.actionButton}
             onPress={openRetourDialog}
-          />
+          /> */}
           <Button
             loading={printPreviousReceiptLoading}
-            title="4. Print Previous Receipt"
+            title="3. Print Previous Receipt"
             style={styles.actionButton}
             onPress={onPrintPreviousPrintedReceipt}
           />
           <Button
             loading={dailyReceiptPrintLoading}
-            title="5. Print Daily Receipt"
+            title="4. Print Daily Receipt"
             style={styles.actionButton}
             onPress={onPrintDailyReceiptPressed}
           />
           <Button
             loading={daily10To6ReceiptPrintLoading}
-            title="6. Print Daily Receipt 10/6"
+            title="5. Print Daily Receipt 10/6"
             style={styles.actionButton}
             onPress={onPrintDaily10To6ReceiptPressed}
           />
