@@ -72,6 +72,8 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     React.useState(false);
   const [printPreviousReceiptLoading, setPrintPreviousReceiptLoading] =
     React.useState(false);
+  const [daily10To6ReceiptPrintLoading, setDaily10To6ReceiptPrintLoading] =
+    React.useState(false);
   const [bottomModalShown, setBottomModalShown] = React.useState(false);
   const [selectPaybackPeriodModalShown, setSelectPaybackPeriodModalShown] =
     React.useState(false);
@@ -300,6 +302,12 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     await printDailyReport();
   }, []);
 
+  const onPrintDaily10To6ReceiptPressed = () => {
+    setDaily10To6ReceiptPrintLoading(true);
+
+    setDaily10To6ReceiptPrintLoading(false);
+  };
+
   const onPaybackPeriodSelected = useCallback(
     (itemValue: string, indexIndex: number) => {
       setSelectedPaybackPeriod(itemValue);
@@ -406,47 +414,6 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
   }, [scanningStatus]);
 
-  const renderButtons = useCallback(() => {
-    if (appModes === 'expense-retour') {
-      return (
-        <>
-          <Button
-            title="Expense"
-            style={styles.scanNfcBtn}
-            loading={loading}
-            onPress={onScanNfcPressed}
-          />
-          <Button
-            title="Retour"
-            style={styles.scanNfcBtn}
-            onPress={openRetourDialog}
-          />
-        </>
-      );
-    } else if (appModes === 'expense') {
-      return (
-        <>
-          <Button
-            title="Expense"
-            style={styles.scanNfcBtn}
-            loading={loading}
-            onPress={onScanNfcPressed}
-          />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <Button
-            title="Retour"
-            style={styles.scanNfcBtn}
-            onPress={onScanNfcForRetourPressed}
-          />
-        </>
-      );
-    }
-  }, []);
-
   const renderPaybackPeriodItems = useCallback(
     () =>
       paybackPeriods.map((paybackPeriod, index) => (
@@ -466,17 +433,38 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
-          {renderButtons()}
           <Button
-            title="Show Balance"
-            style={styles.scanNfcBtn}
+            title="1. Show Balance"
+            style={styles.actionButton}
             onPress={onScanNfcForBalance}
           />
           <Button
+            title="2. Expense"
+            style={styles.actionButton}
+            onPress={onScanNfcPressed}
+          />
+          <Button
+            title="3. Retour"
+            style={styles.actionButton}
+            onPress={openRetourDialog}
+          />
+          <Button
+            loading={printPreviousReceiptLoading}
+            title="4. Print Previous Receipt"
+            style={styles.actionButton}
+            onPress={onPrintPreviousPrintedReceipt}
+          />
+          <Button
             loading={dailyReceiptPrintLoading}
-            title="Print Daily Receipt"
-            style={styles.scanNfcBtn}
+            title="5. Print Daily Receipt"
+            style={styles.actionButton}
             onPress={onPrintDailyReceiptPressed}
+          />
+          <Button
+            loading={daily10To6ReceiptPrintLoading}
+            title="6. Print Daily Receipt 10/6"
+            style={styles.actionButton}
+            onPress={onPrintDaily10To6ReceiptPressed}
           />
         </View>
       </View>
@@ -587,9 +575,9 @@ const styles = StyleSheet.create({
     height: responsiveWidth(40),
     width: responsiveWidth(40),
   },
-  scanNfcBtn: {
-    marginTop: responsiveHeight(4),
-    width: '80%',
+  actionButton: {
+    marginTop: responsiveHeight(3),
+    width: '100%',
   },
   modalContainer: {
     alignSelf: 'center',

@@ -59,7 +59,7 @@ export const printReceipt: (
     `[C]<b>No Cash Refunds</b>`;
 
   console.log(textToBePrinted);
-  await setPreviousPrintedReceipt(textToBePrinted);
+  setPreviousPrintedReceipt(textToBePrinted);
 
   await print(textToBePrinted);
 };
