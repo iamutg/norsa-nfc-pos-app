@@ -525,7 +525,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Text style={styles.retourDialogTitleText}>Retour</Text>
         </Dialog.Title>
         <Dialog.Description style={styles.retourDialogText}>
-          This is meant for refund only,do not use for normal transactions.
+          This is meant for refund only, do not use for normal transactions.
         </Dialog.Description>
         <Dialog.Button
           label="Cancel"
