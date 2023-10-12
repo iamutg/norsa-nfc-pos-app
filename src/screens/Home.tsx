@@ -26,9 +26,9 @@ import {
   BottomModal,
   BalanceDialog,
 } from '~/components';
-import {appModes} from '~/constants';
 import {useAuthContext} from '~/context/AuthContext';
 import {
+  doGetDaily10To6Transactions,
   doGetDailyTransactions,
   doGetMultipleIssuanceHistories,
 } from '~/core/ApiService';
@@ -302,8 +302,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     await printDailyReport();
   }, []);
 
-  const onPrintDaily10To6ReceiptPressed = () => {
+  const onPrintDaily10To6ReceiptPressed = async () => {
     setDaily10To6ReceiptPrintLoading(true);
+
+    const dailyTransactions = await doGetDaily10To6Transactions(loginData.id);
+
+    try {
+      if (dailyTransactions.data && dailyTransactions.data.length === 0) {
+        showToast('There are no transactions to be printed');
+      } else if (dailyTransactions.data) {
+        await printDailyReceipt(dailyTransactions.data, loginData?.name);
+      } else {
+        showToast(dailyTransactions.message);
+      }
+    } catch (error) {
+      console.log('Error printing daily Receipt');
+      showToast(error.message);
+    }
 
     setDaily10To6ReceiptPrintLoading(false);
   };
