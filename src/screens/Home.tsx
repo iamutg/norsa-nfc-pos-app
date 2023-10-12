@@ -26,9 +26,9 @@ import {
   BottomModal,
   BalanceDialog,
 } from '~/components';
-import {appModes} from '~/constants';
 import {useAuthContext} from '~/context/AuthContext';
 import {
+  doGetDaily10To6Transactions,
   doGetDailyTransactions,
   doGetMultipleIssuanceHistories,
 } from '~/core/ApiService';
@@ -302,8 +302,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     await printDailyReport();
   }, []);
 
-  const onPrintDaily10To6ReceiptPressed = () => {
+  const onPrintDaily10To6ReceiptPressed = async () => {
     setDaily10To6ReceiptPrintLoading(true);
+
+    const dailyTransactions = await doGetDaily10To6Transactions(loginData.id);
+
+    try {
+      if (dailyTransactions.data && dailyTransactions.data.length === 0) {
+        showToast('There are no transactions to be printed');
+      } else if (dailyTransactions.data) {
+        await printDailyReceipt(dailyTransactions.data, loginData?.name);
+      } else {
+        showToast(dailyTransactions.message);
+      }
+    } catch (error) {
+      console.log('Error printing daily Receipt');
+      showToast(error.message);
+    }
 
     setDaily10To6ReceiptPrintLoading(false);
   };
@@ -443,26 +458,26 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             style={styles.actionButton}
             onPress={onScanNfcPressed}
           />
-          <Button
+          {/* <Button
             title="3. Retour"
             style={styles.actionButton}
             onPress={openRetourDialog}
-          />
+          /> */}
           <Button
             loading={printPreviousReceiptLoading}
-            title="4. Print Previous Receipt"
+            title="3. Print Previous Receipt"
             style={styles.actionButton}
             onPress={onPrintPreviousPrintedReceipt}
           />
           <Button
             loading={dailyReceiptPrintLoading}
-            title="5. Print Daily Receipt"
+            title="4. Print Daily Receipt"
             style={styles.actionButton}
             onPress={onPrintDailyReceiptPressed}
           />
           <Button
             loading={daily10To6ReceiptPrintLoading}
-            title="6. Print Daily Receipt 10/6"
+            title="5. Print Daily Receipt 10/6"
             style={styles.actionButton}
             onPress={onPrintDaily10To6ReceiptPressed}
           />

@@ -316,6 +316,35 @@ export const doGetDailyTransactions: () => Promise<GetDailyTransactionsResponse>
     }
   };
 
+export const doGetDaily10To6Transactions: (
+  merchantId: string,
+) => Promise<GetDailyTransactionsResponse> = async (userId: string) => {
+  try {
+    const axios = await getAxiosInstanceWithAuthHeader();
+
+    const response = await axios.get<
+      GetDailyTransactionsApiResponse,
+      AxiosResponse<GetDailyTransactionsApiResponse>
+    >(mainEndpoints.getDaily10To6Transactions(userId));
+
+    if (response.data?.message === 'success') {
+      return {
+        data: response.data?.data,
+      };
+    } else {
+      return {
+        message: 'Something went wrong',
+      };
+    }
+  } catch (error) {
+    console.log('Error getting daily transactions', error);
+
+    return {
+      message: 'Something went wrong',
+    };
+  }
+};
+
 export const doGetDailySalesPrintCheck: (
   merchantId: string,
 ) => Promise<GetDailySalesPrintCheckResponse> = async merchantId => {
