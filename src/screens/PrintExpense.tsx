@@ -23,13 +23,7 @@ import {
   Transaction,
   TransactionType,
 } from '~/types';
-import {
-  isValidAmount,
-  noop,
-  showAlert,
-  showAlertWithTwoButtons,
-  showToast,
-} from '~/utils';
+import {isValidAmount, showAlert, showToast} from '~/utils';
 
 const merchantPinCodeModalText = 'Please Enter the Merchant Pin code';
 const defaultPinCodeModalText = 'Please Enter the Pin Code to Verify Nfc Card';
