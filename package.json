@@ -12,7 +12,6 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
-    "@react-native-async-storage/async-storage": "^1.15.15",
     "@react-native-firebase/analytics": "13.1.0",
     "@react-native-firebase/app": "13.1.0",
     "@react-native-firebase/crashlytics": "13.1.0",
@@ -27,6 +26,7 @@
     "react-native-dialog": "^9.2.2",
     "react-native-gesture-handler": "^2.0.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-mmkv": "^2.10.2",
     "react-native-nfc-manager": "^3.11.0",
     "react-native-responsive-dimensions": "^3.1.1",
     "react-native-safe-area-context": "^3.3.2",

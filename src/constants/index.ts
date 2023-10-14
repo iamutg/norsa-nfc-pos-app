@@ -1,4 +1,4 @@
-import {AppMode} from '~/types';
+import {AppMode, PrinterConfig} from '~/types';
 
 const DEV_BASE_URL = 'https://norsa-backend-demo.herokuapp.com/api/';
 const PROD_BASE_URL = 'https://norsabackend.herokuapp.com/api/';
@@ -24,11 +24,10 @@ export const mainEndpoints = {
     `dailySalesPrintCheck/update/${merchantId}`,
 };
 
-export const asyncStorageKeys = {
-  loginData: 'KEY_LOGIN_DATA',
-  dailyReportPrintedDate: 'KEY_DAILY_REPORT_PRRINTED_DATE',
-  printerDefaultConfig: 'KEY_PRINTER_DEFAULT_CONFIG',
-  previousPrintedReceipt: 'KEY_PREVIOUS_PRINTED_RECEIPT',
+export const PrinterDefaultConfigObject: PrinterConfig = {
+  printerDpi: 150,
+  printerWidthMM: 48,
+  printerNbrCharactersPerLine: 30,
 };
 
 export const appModes: AppMode = 'expense-retour';

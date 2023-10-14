@@ -1,136 +1,131 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {asyncStorageKeys} from '../constants/index';
-import {LoginData, PrinterConfig} from '~/types';
-import {printerDefaultConfig} from '~/utils';
+import {MMKV} from 'react-native-mmkv';
+import {FailureResult, PrinterConfig, SuccessResult} from '~/types';
+import {PrinterDefaultConfigObject} from '~/constants';
 
-export const getPrinterDefaultConfig: () => Promise<PrinterConfig> =
-  async () => {
+export type LocalStorageFailureResult = Omit<
+  FailureResult<undefined, Error>,
+  'code'
+>;
+
+export type LocalStorageSetSuccessResult = Omit<SuccessResult<any>, 'data'>;
+
+export type LocalStorageServiceSetResult =
+  | LocalStorageSetSuccessResult
+  | LocalStorageFailureResult;
+
+export type LocalStorageGetResult<D> =
+  | SuccessResult<D>
+  | LocalStorageFailureResult;
+
+const GeneralErrorMessage = 'Unable to set/get value to/from Local storage';
+
+const formatErrorMessage = (key: string, type: 'set' | 'get', value?: any) =>
+  type === 'get'
+    ? `Unable to get for key: ${key}`
+    : `Unable to set value: ${value} for key: ${key}`;
+
+const createLocalStorageGetSuccessResult = <D = undefined>(
+  result?: Partial<SuccessResult<D>>,
+): SuccessResult<D> => ({
+  success: true,
+  failure: false,
+  data: result?.data,
+});
+
+const createLocalStorageSetSuccessResult =
+  (): LocalStorageSetSuccessResult => ({
+    success: true,
+    failure: false,
+  });
+
+const createStorageFailureResult = (
+  result?: Partial<LocalStorageFailureResult>,
+): LocalStorageFailureResult => ({
+  success: false,
+  failure: true,
+  message: result?.message ?? GeneralErrorMessage,
+  cause: result?.cause,
+});
+
+const handleError = (error: unknown, message: string) =>
+  createStorageFailureResult({cause: error, message});
+
+const Storage = new MMKV();
+
+enum LocalStorageKey {
+  Login = 'app/loginData',
+  DailyReportPrintedDate = 'app/dailyReportPrintedDate',
+  PrinterDefaultConfig = 'app/printerDefaultConfig',
+  PreviousPrintedReceipt = 'app/previousPrintedReceipt',
+}
+
+export const LocalStorageService = {
+  Keys: LocalStorageKey,
+  setString(key: LocalStorageKey, value: string) {
     try {
-      const configJson = await AsyncStorage.getItem(
-        asyncStorageKeys.printerDefaultConfig,
-      );
+      Storage.set(key, value);
+      return createLocalStorageSetSuccessResult();
+    } catch (error) {
+      return handleError(error, formatErrorMessage(key, 'set', value));
+    }
+  },
+  getString(key: LocalStorageKey) {
+    try {
+      const stringFromStorage = Storage.getString(key);
+      return createLocalStorageGetSuccessResult({data: stringFromStorage});
+    } catch (error) {
+      return handleError(error, formatErrorMessage(key, 'get'));
+    }
+  },
+  setObject<T extends object>(key: LocalStorageKey, value: T) {
+    try {
+      const objectJson = JSON.stringify(value);
+      Storage.set(key, objectJson);
 
-      if (configJson) {
-        const config: PrinterConfig = JSON.parse(configJson);
-        return config;
+      return createLocalStorageSetSuccessResult();
+    } catch (error) {
+      return handleError(error, formatErrorMessage(key, 'set', value));
+    }
+  },
+  getObject<T extends object>(key: LocalStorageKey) {
+    try {
+      const objectJson = Storage.getString(key);
+
+      if (objectJson) {
+        const obj: T = JSON.parse(objectJson);
+        return createLocalStorageGetSuccessResult({data: obj});
       } else {
-        return printerDefaultConfig;
+        return createLocalStorageGetSuccessResult();
       }
     } catch (error) {
-      console.log('Error getting config data from async storage', error);
-      return printerDefaultConfig;
+      return handleError(error, formatErrorMessage(key, 'get'));
     }
-  };
+  },
+  clearKey(key: LocalStorageKey) {
+    try {
+      Storage.delete(key);
 
-export const setPrinterDefaultConfig: (
-  config: PrinterConfig,
-) => Promise<void> = async config => {
-  try {
-    await AsyncStorage.setItem(
-      asyncStorageKeys.printerDefaultConfig,
-      JSON.stringify(config),
-    );
-  } catch (error) {
-    console.log('Error setting config data', error);
-  }
-};
-
-export const getLoginData: () => Promise<LoginData | null> = async () => {
-  try {
-    const loginDataJson = await AsyncStorage.getItem(
-      asyncStorageKeys.loginData,
-    );
-
-    if (loginDataJson) {
-      const loginData = JSON.parse(loginDataJson) as LoginData;
-      return loginData;
-    } else {
-      return null;
+      return createLocalStorageSetSuccessResult();
+    } catch (error) {
+      return handleError(error, `Unable to clear key: ${key}`);
     }
-  } catch (error) {
-    console.log('Error getting login data from async storage', error);
-    return null;
-  }
-};
+  },
+  clearAll() {
+    try {
+      Storage.clearAll();
 
-export const getAuthToken: () => Promise<string> = async () => {
-  const loginData = await getLoginData();
-
-  return loginData.accessToken ?? '';
-};
-
-export const setLoginData: (
-  loginData: LoginData,
-) => Promise<void> = async loginData => {
-  try {
-    await AsyncStorage.setItem(
-      asyncStorageKeys.loginData,
-      JSON.stringify(loginData),
-    );
-  } catch (error) {
-    console.log('Error setting login data', error);
-  }
-};
-
-export const setDailyReportPrintedDate: (
-  date: string,
-) => Promise<void> = async date => {
-  try {
-    await AsyncStorage.setItem(asyncStorageKeys.dailyReportPrintedDate, date);
-  } catch (error) {
-    console.log('Error setting daily report printed date', error);
-  }
-};
-
-export const getDailyReportPrintedDate: () => Promise<
-  string | null
-> = async () => {
-  try {
-    const date = await AsyncStorage.getItem(
-      asyncStorageKeys.dailyReportPrintedDate,
+      return createLocalStorageSetSuccessResult();
+    } catch (error) {
+      return handleError(error, 'Unable to clear all storage');
+    }
+  },
+  getPrinterDefaultConfig(): PrinterConfig {
+    const getConfigRes = this.getObject<PrinterConfig>(
+      this.Keys.PrinterDefaultConfig,
     );
 
-    return date;
-  } catch (error) {
-    console.log('Error getting daily report printed date', error);
-
-    return null;
-  }
-};
-
-export const getPreviousPrintedReceipt: () => Promise<
-  string | null
-> = async () => {
-  try {
-    const previousPrintedReceipt = await AsyncStorage.getItem(
-      asyncStorageKeys.previousPrintedReceipt,
-    );
-
-    return previousPrintedReceipt;
-  } catch (error) {
-    console.log('Error getting previous printed receipt', error);
-
-    return null;
-  }
-};
-
-export const setPreviousPrintedReceipt: (
-  previousPrintedReceipt: string,
-) => Promise<void> = async previousPrintedReceipt => {
-  try {
-    await AsyncStorage.setItem(
-      asyncStorageKeys.previousPrintedReceipt,
-      previousPrintedReceipt,
-    );
-  } catch (error) {
-    console.log('Error setting previous printed receipt', error);
-  }
-};
-
-export const clearLoginData: () => Promise<void> = async () => {
-  try {
-    await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
-  } catch (error) {
-    console.log('Error clearing login data', error);
-  }
+    return getConfigRes.success
+      ? getConfigRes.data ?? PrinterDefaultConfigObject
+      : PrinterDefaultConfigObject;
+  },
 };

@@ -8,12 +8,6 @@ const intNumberRegex = /^[0-9]+$/;
 const emailRegex =
   /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
-export const printerDefaultConfig: PrinterConfig = {
-  printerDpi: 150,
-  printerWidthMM: 48,
-  printerNbrCharactersPerLine: 30,
-};
-
 export const noop = () => {};
 
 export function isError(error: unknown): error is Error & {message?: string} {
