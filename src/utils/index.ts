@@ -1,6 +1,6 @@
 import moment from 'moment';
 import {Alert, ToastAndroid} from 'react-native';
-import {PrintBalanceInfo, PrinterConfig} from '~/types';
+import {PrintBalanceInfo} from '~/types';
 
 const floatNumberRegex = /^(\d+(\.\d+)?)$|^(.?\d+)$/;
 const twoDecimalPlaceRegex = /^[0-9]*.?[0-9]{1,2}$/;
@@ -9,6 +9,33 @@ const emailRegex =
   /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
 export const noop = () => {};
+
+export function createPredicatePair<T extends (...args: any[]) => boolean>(
+  predicate: T,
+): {
+  positive: (...args: Parameters<T>) => boolean;
+  negative: (...args: Parameters<T>) => boolean;
+} {
+  return {
+    positive: predicate,
+    negative: (...args: Parameters<T>) => !predicate(args),
+  };
+}
+
+export const isDefined = (value: any) => value !== undefined && value !== null;
+export const isNotDefined = (value: any) =>
+  value === undefined || value === null;
+
+export const {positive: isObjectEmpty, negative: isObjectNotEmpty} =
+  createPredicatePair((obj: object) => {
+    for (const prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
 export function isError(error: unknown): error is Error & {message?: string} {
   return error instanceof Error;

@@ -63,18 +63,6 @@ export type GeneralFailureResponse = {
 
 export type Merchant = {Name?: string; Id?: string; pinCode?: string};
 
-export type LoginData = {
-  id?: string;
-  accessToken?: string;
-  refreshToken?: string;
-  dormantUser?: number;
-  isAdmin?: number;
-  expiryDate?: number;
-  name?: string;
-  pinCode?: string;
-  Merchant_ID?: string;
-};
-
 export type LoginApiRequest = {
   email: string;
   password: string;

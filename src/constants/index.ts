@@ -1,13 +1,11 @@
 import {AppMode, PrinterConfig} from '~/types';
 
-const DEV_BASE_URL = 'https://norsa-backend-demo.herokuapp.com/api/';
-const PROD_BASE_URL = 'https://norsabackend.herokuapp.com/api/';
+export enum AppEnv {
+  Staging = 'Staging',
+  Prod = 'Prod',
+}
 
-export const BASE_URL = __DEV__ ? DEV_BASE_URL : PROD_BASE_URL;
-
-export const authEndpoints = {
-  login: 'auth/login',
-};
+export const SelectedAppEnv = __DEV__ ? AppEnv.Staging : AppEnv.Prod;
 
 export const mainEndpoints = {
   getIssuanceHistory: 'issuancehistory/OnNfcAndPinCode',
