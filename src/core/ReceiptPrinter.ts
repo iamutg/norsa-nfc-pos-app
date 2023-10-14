@@ -2,7 +2,7 @@ import moment from 'moment';
 import {PosPrinter} from '~/native_modules/PosPrinter';
 import {Client, DailyTransaction, TransactionType} from '~/types';
 import {generateReceiptNumber} from '~/utils';
-import {setPreviousPrintedReceipt} from './LocalStorageService';
+import {LocalStorageService} from './LocalStorageService';
 
 export type PrintReceiptParams = {
   price: number;
@@ -61,7 +61,15 @@ export const ReceiptPrinter = {
       '[L]+5999 767-1563';
 
     console.log(textToBePrinted);
-    return PosPrinter.print(textToBePrinted);
+    const printRes = await PosPrinter.print(textToBePrinted);
+    if (printRes.success) {
+      LocalStorageService.setString(
+        LocalStorageService.Keys.PreviousPrintedReceipt,
+        textToBePrinted,
+      );
+    }
+
+    return printRes;
   },
   async printDailyReceipt(
     dailyTransactions: DailyTransaction[],
