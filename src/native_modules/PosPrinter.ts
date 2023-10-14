@@ -1,34 +1,50 @@
 import {NativeModules} from 'react-native';
-import {PosPrinterInterface, PrinterConfig} from '../types/index';
-import {getPrinterDefaultConfig} from './../core/LocalStorageService';
+import {
+  FailureResult,
+  PosPrinterModule,
+  PrinterConfig,
+  SuccessResult,
+} from '~/types';
+import {LocalStorageService} from '~/core/LocalStorageService';
 
-const PosPrinterModule = NativeModules.PosPrinterModule;
-const module = PosPrinterModule as PosPrinterInterface;
+export type PosPrinterResult =
+  | Omit<SuccessResult<undefined>, 'data'>
+  | Omit<FailureResult<undefined, Error>, 'code'>;
 
-export const print: (
-  textToBePrinted: string,
-) => Promise<void> = async textToBePrinted => {
-  const config = await getPrinterDefaultConfig();
+const NativePosPrinter: PosPrinterModule = NativeModules.PosPrinterModule;
 
-  console.log('Config', config);
+export const PosPrinter = {
+  async print(text: string, config?: PrinterConfig): Promise<PosPrinterResult> {
+    try {
+      const printerConfig =
+        config || LocalStorageService.getPrinterDefaultConfig();
 
-  await module.print(
-    textToBePrinted,
-    config.printerDpi,
-    config.printerWidthMM,
-    config.printerNbrCharactersPerLine,
-  );
-};
+      await NativePosPrinter.print(
+        text,
+        printerConfig.printerDpi,
+        printerConfig.printerWidthMM,
+        printerConfig.printerNbrCharactersPerLine,
+      );
 
-export const printWithConfig: (
-  textToBePrinted: string,
-  config: PrinterConfig,
-) => Promise<void> = async (text, config) => {
-  console.log('Config', config);
-  await module.print(
-    text,
-    config.printerDpi,
-    config.printerWidthMM,
-    config.printerNbrCharactersPerLine,
-  );
+      return {success: true, failure: false};
+    } catch (error) {
+      const errorWithMessage = error as Error & {code: string};
+
+      if (errorWithMessage.code === 'Exception') {
+        return {
+          success: false,
+          failure: true,
+          message: errorWithMessage.message,
+          cause: error,
+        };
+      } else {
+        return {
+          success: false,
+          failure: true,
+          message: 'Sometginh went wrong while printing',
+          cause: error,
+        };
+      }
+    }
+  },
 };

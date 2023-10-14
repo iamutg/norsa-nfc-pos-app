@@ -32,7 +32,7 @@ export type PrinterConfig = {
   printerNbrCharactersPerLine: number;
 };
 
-export interface PosPrinterInterface {
+export interface PosPrinterModule {
   print: (
     textToBePrinted: string,
     printerDpi: number,
