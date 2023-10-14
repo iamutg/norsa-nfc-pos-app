@@ -1,4 +1,4 @@
-import {MMKV} from 'react-native-mmkv';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {FailureResult, PrinterConfig, SuccessResult} from '~/types';
 import {PrinterDefaultConfigObject} from '~/constants';
 
@@ -50,8 +50,6 @@ const createStorageFailureResult = (
 const handleError = (error: unknown, message: string) =>
   createStorageFailureResult({cause: error, message});
 
-const Storage = new MMKV();
-
 enum LocalStorageKey {
   Login = 'app/loginData',
   DailyReportPrintedDate = 'app/dailyReportPrintedDate',
@@ -61,35 +59,36 @@ enum LocalStorageKey {
 
 export const LocalStorageService = {
   Keys: LocalStorageKey,
-  setString(key: LocalStorageKey, value: string) {
+
+  async setString(key: LocalStorageKey, value: string) {
     try {
-      Storage.set(key, value);
+      await AsyncStorage.setItem(key, value);
       return createLocalStorageSetSuccessResult();
     } catch (error) {
       return handleError(error, formatErrorMessage(key, 'set', value));
     }
   },
-  getString(key: LocalStorageKey) {
+  async getString(key: LocalStorageKey) {
     try {
-      const stringFromStorage = Storage.getString(key);
+      const stringFromStorage = await AsyncStorage.getItem(key);
       return createLocalStorageGetSuccessResult({data: stringFromStorage});
     } catch (error) {
       return handleError(error, formatErrorMessage(key, 'get'));
     }
   },
-  setObject<T extends object>(key: LocalStorageKey, value: T) {
+  async setObject<T extends object>(key: LocalStorageKey, value: T) {
     try {
       const objectJson = JSON.stringify(value);
-      Storage.set(key, objectJson);
+      await AsyncStorage.setItem(key, objectJson);
 
       return createLocalStorageSetSuccessResult();
     } catch (error) {
       return handleError(error, formatErrorMessage(key, 'set', value));
     }
   },
-  getObject<T extends object>(key: LocalStorageKey) {
+  async getObject<T extends object>(key: LocalStorageKey) {
     try {
-      const objectJson = Storage.getString(key);
+      const objectJson = await AsyncStorage.getItem(key);
 
       if (objectJson) {
         const obj: T = JSON.parse(objectJson);
@@ -101,26 +100,27 @@ export const LocalStorageService = {
       return handleError(error, formatErrorMessage(key, 'get'));
     }
   },
-  clearKey(key: LocalStorageKey) {
+  async clearKey(key: LocalStorageKey) {
     try {
-      Storage.delete(key);
+      await AsyncStorage.removeItem(key);
 
       return createLocalStorageSetSuccessResult();
     } catch (error) {
       return handleError(error, `Unable to clear key: ${key}`);
     }
   },
-  clearAll() {
+  async clearAll() {
     try {
-      Storage.clearAll();
+      const allKeys = await AsyncStorage.getAllKeys();
+      await AsyncStorage.multiRemove(allKeys);
 
       return createLocalStorageSetSuccessResult();
     } catch (error) {
       return handleError(error, 'Unable to clear all storage');
     }
   },
-  getPrinterDefaultConfig(): PrinterConfig {
-    const getConfigRes = this.getObject<PrinterConfig>(
+  async getPrinterDefaultConfig(): Promise<PrinterConfig> {
+    const getConfigRes = await this.getObject<PrinterConfig>(
       this.Keys.PrinterDefaultConfig,
     );
 

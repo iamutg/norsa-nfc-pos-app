@@ -17,7 +17,7 @@ export const PosPrinter = {
   async print(text: string, config?: PrinterConfig): Promise<PosPrinterResult> {
     try {
       const printerConfig =
-        config || LocalStorageService.getPrinterDefaultConfig();
+        config || (await LocalStorageService.getPrinterDefaultConfig());
 
       await NativePosPrinter.print(
         text,
