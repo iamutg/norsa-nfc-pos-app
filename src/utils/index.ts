@@ -16,6 +16,10 @@ export const printerDefaultConfig: PrinterConfig = {
 
 export const noop = () => {};
 
+export function isError(error: unknown): error is Error & {message?: string} {
+  return error instanceof Error;
+}
+
 export const showToast: (message: string, duration?: number) => void = (
   message,
   duration = ToastAndroid.SHORT,

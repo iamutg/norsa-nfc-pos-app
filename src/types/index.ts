@@ -3,6 +3,24 @@ import {routeNames} from '~/navigation/routeNames';
 
 // Common
 
+export interface SuccessResult<D> {
+  success: true;
+  failure: false;
+  data?: D;
+}
+
+export interface FailureResult<C, E> {
+  success: false;
+  failure: true;
+  message: string;
+  code: C;
+  cause?: E | unknown;
+}
+
+export type Result<D, C, E> = SuccessResult<D> | FailureResult<C, E>;
+
+export type Nullable<T> = T | null;
+
 export type PickerItem = {
   title: string;
   value: string;
@@ -24,23 +42,6 @@ export interface PosPrinterInterface {
 }
 
 export interface EmptyProps {}
-
-export type NfcTagReadResult = {
-  success: boolean;
-  error: string;
-  text: string;
-};
-
-export type NfcTagWriteResult = {
-  success: boolean;
-  error: string;
-};
-
-export type ParseTagResult = {
-  success: boolean;
-  error: string;
-  text: string;
-};
 
 export type NfcTagOperationStatus = 'scanning' | 'error' | 'success' | 'none';
 
