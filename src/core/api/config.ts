@@ -42,7 +42,7 @@ axios.interceptors.request.use(req => {
   return req;
 });
 
-function createRequestConfig(requestConfig: ApiRequestConfig) {
+function createRequestConfig<D>(requestConfig: ApiRequestConfig<D>) {
   const axiosReqConfig: AxiosRequestConfig = {};
 
   axiosReqConfig.withAuth = requestConfig.withAuth;
@@ -107,33 +107,33 @@ export function handlerError(error: unknown): ApiFailureResult {
   }
 }
 
-export function doGet<R>(requestConfig: ApiRequestConfig) {
+export function doGet<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
   return axios.get<R>(requestConfig.endpoint, config);
 }
 
-export function doPost<R>(requestConfig: ApiRequestConfig) {
+export function doPost<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
   return axios.post<R>(requestConfig.endpoint, requestConfig.data, config);
 }
 
-export function doPut<R>(requestConfig: ApiRequestConfig) {
+export function doPut<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
   return axios.put<R>(requestConfig.endpoint, requestConfig.data, config);
 }
 
-export function doPatch<R>(requestConfig: ApiRequestConfig) {
+export function doPatch<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
   return axios.patch<R>(requestConfig.endpoint, requestConfig.data, config);
 }
 
-export function doDelete<R>(requestConfig: ApiRequestConfig) {
+export function doDelete<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
   return axios.delete<R>(requestConfig.endpoint, config);
 }
 
-export const createApiRequest = <R = undefined>(
-  requestConfig: ApiRequestConfig,
+export const createApiRequest = <R = undefined, D = undefined>(
+  requestConfig: ApiRequestConfig<D>,
   errorHandler?: CustomErrorHandler,
 ) =>
   async function (): Promise<ApiResult<R>> {

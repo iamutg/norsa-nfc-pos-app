@@ -28,6 +28,21 @@ export enum ApiState {
   Failure = 'Failure',
 }
 
-export const ApiEndpoints = {};
+export const mainEndpoints = {
+  getDailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
+  getMerchantName: 'merchants/getMerchantNameByUserId',
+  getDailySalesPrintCheck: (merchantId: string) =>
+    `dailySalesPrintCheck/getByMerchantId/${merchantId}`,
+  postDailySalesPrintCheck: (merchantId: string) =>
+    `dailySalesPrintCheck/update/${merchantId}`,
+};
+
+export const ApiEndpoints = {
+  Login: 'auth/login',
+  MerchantName: 'merchants/getMerchantNameByUserId',
+  IssuanceHistory: 'issuancehistory/OnNfcAndPinCode',
+  MultipleIssuanceHistories: 'issuancehistory/OnNfcAndPinCodeMI',
+  CreateTransactionHistory: 'transactionHistory/createTransactionHistory',
+};
 
 export const BaseUrl = BaseUrls[SelectedAppEnv];

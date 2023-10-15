@@ -63,97 +63,11 @@ export type GeneralFailureResponse = {
 
 export type Merchant = {Name?: string; Id?: string; pinCode?: string};
 
-export type LoginApiRequest = {
-  email: string;
-  password: string;
-};
-
-export type LoginApiResponse = {
-  result?: string;
-  message?: string;
-  data?: LoginData;
-};
-
-export type LoginSuccessResponse = {
-  data?: LoginData;
-};
-
 export type MerchantNameApiResponse = {
   Name?: string;
 };
 
 export type LoginResponse = LoginSuccessResponse & GeneralFailureResponse;
-
-export type IssuanceHistory = {
-  id?: string;
-  Client_id?: string;
-  Pincode?: string;
-  DateTime?: string;
-  Amount?: string;
-  AmountPaid?: string;
-  Balance?: string;
-  clientCode?: string;
-  clientName?: string;
-  paybackPeriod?: number;
-};
-
-export type GetIssuanceHistoryApiRequest = {
-  nfcCardId: string;
-};
-
-export type GetIssuanceHistoryApiResponse = {
-  error?: string;
-  data?: {
-    data?: {
-      id?: string;
-      Client_id?: string;
-      Pincode?: string;
-      DateTime?: string;
-      Amount?: string;
-      AmountPaid?: string;
-      Balance?: string;
-    };
-    clientCodeAndFullName?: {
-      Code?: string;
-      FullName?: string;
-      numberOfMonths?: number;
-    };
-  };
-};
-
-export type GetMultipleIssuanceHistoriesApiResponse = {
-  error?: string;
-  data?: Array<{
-    data?: {
-      id?: string;
-      Client_id?: string;
-      Pincode?: string;
-      DateTime?: string;
-      Amount?: string;
-      AmountPaid?: string;
-      Balance?: string;
-    };
-    clientCodeAndFullName?: {
-      Code?: string;
-      FullName?: string;
-      numberOfMonths?: number;
-    };
-  }>;
-};
-
-export type GetIssuanceHistorySuccessResponse = {
-  data?: IssuanceHistory;
-};
-
-export type GetIssuanceHistoriesSuccessResponse = {
-  data?: Array<IssuanceHistory>;
-};
-
-export type GetIssuanceHistoryResponse = GetIssuanceHistorySuccessResponse &
-  GeneralFailureResponse;
-
-export type GetMultipleIssuanceHistoriesResponse =
-  GetIssuanceHistoriesSuccessResponse & GeneralFailureResponse;
 
 export type Client = {
   id: string;
@@ -172,21 +86,6 @@ export type GetClientResponse = GetClientSuccessResponse &
 
 export type CreateTransactionHistoryApiResponse = {
   message?: string;
-};
-
-export enum TransactionType {
-  expense = 1,
-  retour = 2,
-}
-
-export type Transaction = {
-  Client_id: string;
-  Merchant_ID: string;
-  issuancehistoryId: string;
-  ItemDescription: 'Expense' | 'Retour';
-  dateTime: string;
-  AmountUser: number;
-  transactionType: TransactionType;
 };
 
 export type CreateTransactionHistoryResponse = {
@@ -209,18 +108,6 @@ export type GetMerchantIdSuccessResponse = {
 
 export type GetMerchantIdResponse = GetMerchantIdSuccessResponse &
   GeneralFailureResponse;
-
-export type DailyTransaction = {
-  id?: string;
-  Client_id?: string;
-  Merchant_ID?: string;
-  ItemDescription?: string;
-  dateTime?: string;
-  AmountUser?: number;
-  issuancehistoryId?: string;
-  transactionType?: number;
-  totalPaybackPeriods?: number;
-};
 
 export type GetDailyTransactionsApiResponse = {
   message?: string;
