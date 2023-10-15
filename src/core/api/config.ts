@@ -142,19 +142,19 @@ export const createApiRequest = <R = undefined, D = undefined>(
 
       switch (requestConfig.method) {
         case HttpMethod.Get:
-          response = await doGet<R>(requestConfig);
+          response = await doGet<R, D>(requestConfig);
           break;
         case HttpMethod.Post:
-          response = await doPost<R>(requestConfig);
+          response = await doPost<R, D>(requestConfig);
           break;
         case HttpMethod.Put:
-          response = await doPut<R>(requestConfig);
+          response = await doPut<R, D>(requestConfig);
           break;
         case HttpMethod.Patch:
-          response = await doPatch<R>(requestConfig);
+          response = await doPatch<R, D>(requestConfig);
           break;
         case HttpMethod.Delete:
-          response = await doDelete<R>(requestConfig);
+          response = await doDelete<R, D>(requestConfig);
           break;
       }
 
