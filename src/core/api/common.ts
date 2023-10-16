@@ -8,6 +8,7 @@ import {
   ApiResult,
   ApiSuccessResult,
   CustomErrorHandler,
+  GeneralApiResponse,
   GeneralApiResponseData,
 } from './types';
 import {useGlobalStore} from '~/state';
@@ -64,9 +65,9 @@ export const createApiSuccessResult = <D = undefined>(
   data: result?.data,
 });
 
-export const createApiFailureResult = <E>(
-  result?: Partial<ApiFailureResult<E>>,
-): ApiFailureResult<E> => ({
+export const createApiFailureResult = (
+  result?: Partial<ApiFailureResult>,
+): ApiFailureResult => ({
   success: false,
   failure: true,
   message: result?.message ?? ApiErrorMessage.General,
@@ -132,34 +133,43 @@ export function doDelete<R, D>(requestConfig: ApiRequestConfig<D>) {
   return axios.delete<R>(requestConfig.endpoint, config);
 }
 
-export const createApiRequest = <R = undefined, D = undefined>(
+async function _doApiRequest<D, R>(
   requestConfig: ApiRequestConfig<D>,
   errorHandler?: CustomErrorHandler,
-) =>
-  async function (): Promise<ApiResult<R>> {
-    try {
-      let response: AxiosResponse<R> | undefined;
+): Promise<ApiResult<R>> {
+  try {
+    let response: AxiosResponse<R> | undefined;
 
-      switch (requestConfig.method) {
-        case HttpMethod.Get:
-          response = await doGet<R, D>(requestConfig);
-          break;
-        case HttpMethod.Post:
-          response = await doPost<R, D>(requestConfig);
-          break;
-        case HttpMethod.Put:
-          response = await doPut<R, D>(requestConfig);
-          break;
-        case HttpMethod.Patch:
-          response = await doPatch<R, D>(requestConfig);
-          break;
-        case HttpMethod.Delete:
-          response = await doDelete<R, D>(requestConfig);
-          break;
-      }
-
-      return createApiSuccessResult({data: response?.data});
-    } catch (error) {
-      return errorHandler ? errorHandler(error) : handlerError(error);
+    switch (requestConfig.method) {
+      case HttpMethod.Get:
+        response = await doGet<R, D>(requestConfig);
+        break;
+      case HttpMethod.Post:
+        response = await doPost<R, D>(requestConfig);
+        break;
+      case HttpMethod.Put:
+        response = await doPut<R, D>(requestConfig);
+        break;
+      case HttpMethod.Patch:
+        response = await doPatch<R, D>(requestConfig);
+        break;
+      case HttpMethod.Delete:
+        response = await doDelete<R, D>(requestConfig);
+        break;
     }
-  };
+
+    return createApiSuccessResult({data: response.data});
+  } catch (error) {
+    return errorHandler ? errorHandler(error) : handlerError(error);
+  }
+}
+
+export const doApiRequest = <R extends GeneralApiResponse>(
+  requestConfig: ApiRequestConfig<undefined>,
+  errorHandler?: CustomErrorHandler,
+) => _doApiRequest<undefined, R>(requestConfig, errorHandler);
+
+export const doApiRequestWithBody = <D, R extends GeneralApiResponse>(
+  requestConfig: ApiRequestConfig<D>,
+  errorHandler?: CustomErrorHandler,
+) => _doApiRequest<D, R>(requestConfig, errorHandler);

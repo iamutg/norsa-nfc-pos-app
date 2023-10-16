@@ -1,6 +1,7 @@
 import {AxiosError} from 'axios';
 import {SuccessResult, FailureResult} from '~/types';
 import {HttpMethod} from './constants';
+import {LoginData} from '~/state';
 
 type ApiRequestConfigBase = {
   endpoint: string;
@@ -28,10 +29,14 @@ export type GeneralApiResponseData = {message?: string};
 
 export type ApiReqWithNfcCard = {nfcCardId: string};
 
-type GeneralApiResponse<D = undefined> = {
+export type GeneralApiResponse<D = any> = {
   error?: string;
   data?: D;
 };
+
+export type LoginApiResponse = GeneralApiResponse<LoginData>;
+
+export type MerchantNameApiResponse = GeneralApiResponse<{Name?: string}>;
 
 export type IssuanceHistory = {
   id?: string;
