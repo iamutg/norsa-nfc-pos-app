@@ -1,5 +1,4 @@
-import {useNavigation} from '@react-navigation/native';
-import React, {FC, useCallback} from 'react';
+import React from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -13,14 +12,15 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {useAuthContext} from '~/context/AuthContext';
-import {RouteName} from '~/navigation/RouteName';
+import {useNavigation} from '@react-navigation/native';
+import {HomeScreenNavProp, RouteName} from '~/navigation';
 import {Colors} from '~/styles';
-import {HomeScreenNavProp} from '~/types';
-import {showAlertWithTwoButtons, noop} from './../utils/index';
+import {showAlertWithTwoButtons, noop} from '~/utils';
 import {Icons} from './index';
+import {useGlobalStore} from '~/state';
+import {LocalStorageService} from '~/core/LocalStorageService';
 
-export interface Props {
+export interface HeaderProps {
   style?: StyleProp<ViewStyle>;
   hasBackButton?: boolean;
   hasLogoutButton?: boolean;
@@ -28,41 +28,39 @@ export interface Props {
   title: string;
 }
 
-const Header: FC<Props> = ({
+export function Header({
   style,
   hasBackButton,
   title,
   hasLogoutButton,
   hasSettingsButton,
-}) => {
-  const {logout} = useAuthContext();
+}: HeaderProps) {
+  const {setLoggedIn, setLoginData} = useGlobalStore();
 
   const navigation = useNavigation<HomeScreenNavProp>();
 
-  const onBackPressed = useCallback(() => {
-    navigation.goBack();
-  }, []);
-
-  const onLogoutPressed = useCallback(() => {
+  const onLogoutPressed = () =>
     showAlertWithTwoButtons(
       'Logout',
       'Are you sure you want to logout?',
       'No',
       'Yes',
       noop,
-      logout,
+      () => {
+        LocalStorageService.clearKey(LocalStorageService.Keys.Login);
+        setLoginData(null);
+        setLoggedIn(false);
+      },
     );
-  }, []);
 
-  const onSettingsIconPressed = useCallback(() => {
+  const gotoPrinterConfigScreen = () =>
     navigation.navigate(RouteName.PrinterConfig);
-  }, []);
 
   return (
     <View style={[styles.container, style]}>
       <View style={styles.titleContainer}>
         {hasBackButton ? (
-          <TouchableOpacity style={styles.backBtn} onPress={onBackPressed}>
+          <TouchableOpacity style={styles.backBtn} onPress={navigation.goBack}>
             <Icons.MaterialIcons
               name="arrow-back"
               color={Colors.white}
@@ -74,7 +72,7 @@ const Header: FC<Props> = ({
       </View>
       <View style={styles.fRow}>
         {hasSettingsButton ? (
-          <TouchableOpacity onPress={onSettingsIconPressed}>
+          <TouchableOpacity onPress={gotoPrinterConfigScreen}>
             <Icons.FontAwsome
               name="gear"
               size={responsiveFontSize(4)}
@@ -94,7 +92,7 @@ const Header: FC<Props> = ({
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -129,5 +127,3 @@ const styles = StyleSheet.create({
     marginLeft: responsiveWidth(4),
   },
 });
-
-export default Header;

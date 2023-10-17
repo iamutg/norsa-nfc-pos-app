@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React from 'react';
 import {
   Modal,
   StyleProp,
@@ -9,18 +9,19 @@ import {
 } from 'react-native';
 import {Colors} from '~/styles';
 
-export interface Props {
+export interface BottomModalProps {
   style?: StyleProp<ViewStyle>;
   visible: boolean;
   onBackDropPressed?: () => void;
+  children?: React.ReactNode;
 }
 
-const BottomModal: FC<Props> = ({
+export function BottomModal({
   children,
   style,
   visible,
   onBackDropPressed,
-}) => {
+}: BottomModalProps) {
   return (
     <Modal
       style={styles.f1}
@@ -38,7 +39,7 @@ const BottomModal: FC<Props> = ({
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -55,5 +56,3 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
 });
-
-export default BottomModal;

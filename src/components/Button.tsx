@@ -1,6 +1,5 @@
-import React, {FC} from 'react';
+import React from 'react';
 import {
-  View,
   Text,
   StyleSheet,
   StyleProp,
@@ -12,19 +11,24 @@ import {
 } from 'react-native';
 import {
   responsiveFontSize,
-  responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Colors} from '~/styles';
 
-export interface Props extends TouchableOpacityProps {
+export interface ButtonProps extends TouchableOpacityProps {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   title: string;
   loading?: boolean;
 }
 
-const Button: FC<Props> = ({style, textStyle, title, loading, ...props}) => {
+export function Button({
+  style,
+  textStyle,
+  title,
+  loading,
+  ...props
+}: ButtonProps) {
   return (
     <TouchableOpacity style={[styles.container, style]} {...props}>
       {loading ? (
@@ -34,7 +38,7 @@ const Button: FC<Props> = ({style, textStyle, title, loading, ...props}) => {
       )}
     </TouchableOpacity>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -54,5 +58,3 @@ const styles = StyleSheet.create({
     fontSize: responsiveFontSize(2),
   },
 });
-
-export default Button;

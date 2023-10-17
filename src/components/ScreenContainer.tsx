@@ -1,31 +1,20 @@
-import React, {FC} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-  StatusBar,
-} from 'react-native';
-import {
-  responsiveFontSize,
-  responsiveHeight,
-  responsiveWidth,
-} from 'react-native-responsive-dimensions';
+import React from 'react';
+import {View, StyleSheet, StyleProp, ViewStyle, StatusBar} from 'react-native';
 import {Colors} from '~/styles';
 
-export interface Props {
+export interface ScreenContainerProps {
   style?: StyleProp<ViewStyle>;
+  children?: React.ReactNode;
 }
 
-const ScreenContainer: FC<Props> = ({children, style}) => {
+export function ScreenContainer({style, children}: ScreenContainerProps) {
   return (
     <View style={[styles.f1, styles.container, style]}>
       <StatusBar backgroundColor={Colors.accent} />
       {children}
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -35,5 +24,3 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
 });
-
-export default ScreenContainer;

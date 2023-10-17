@@ -1,13 +1,13 @@
-import React, {FC} from 'react';
+import React from 'react';
 import {ActivityIndicator, Modal, StyleSheet, View} from 'react-native';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
 import {Colors} from '~/styles';
 
-export interface Props {
+export interface LoaderProps {
   visible: boolean;
 }
 
-const Loader: FC<Props> = ({visible}) => {
+export function Loader({visible}: LoaderProps) {
   return (
     <Modal style={styles.f1} transparent animationType="fade" visible={visible}>
       <View style={styles.container}>
@@ -22,7 +22,7 @@ const Loader: FC<Props> = ({visible}) => {
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -38,5 +38,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-
-export default Loader;

@@ -1,3 +1,5 @@
+import {Nullable} from '~/types';
+
 export interface LoginData {
   id?: string;
   accessToken?: string;
@@ -13,9 +15,9 @@ export interface LoginData {
 export interface GlobalState {
   splashLodaing: boolean;
   loggedIn: boolean;
-  loginData?: LoginData;
+  loginData?: Nullable<LoginData>;
 
   setSplashLoading: (loading: boolean) => void;
   setLoggedIn: (loggedIn: boolean) => void;
-  setLoginData: (loginData?: LoginData) => void;
+  setLoginData: (loginData?: Nullable<LoginData>) => void;
 }
