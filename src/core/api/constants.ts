@@ -29,7 +29,6 @@ export enum ApiState {
 }
 
 export const mainEndpoints = {
-  getDailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
   getMerchantName: 'merchants/getMerchantNameByUserId',
   getDailySalesPrintCheck: (merchantId: string) =>
     `dailySalesPrintCheck/getByMerchantId/${merchantId}`,
@@ -43,6 +42,7 @@ export const ApiEndpoints = {
   IssuanceHistory: 'issuancehistory/OnNfcAndPinCode',
   MultipleIssuanceHistories: 'issuancehistory/OnNfcAndPinCodeMI',
   CreateTransactionHistory: 'transactionHistory/createTransactionHistory',
+  DailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
 };
 
 export const BaseUrl = BaseUrls[SelectedAppEnv];

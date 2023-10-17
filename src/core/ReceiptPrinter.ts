@@ -1,8 +1,15 @@
 import moment from 'moment';
 import {PosPrinter} from '~/native_modules/PosPrinter';
-import {Client, DailyTransaction, TransactionType} from '~/types';
 import {generateReceiptNumber} from '~/utils';
 import {LocalStorageService} from './LocalStorageService';
+import type {Client} from '~/types';
+import {TransactionType, DailyTransaction} from './api';
+
+export type PrinterConfig = {
+  printerDpi: number;
+  printerWidthMM: number;
+  printerNbrCharactersPerLine: number;
+};
 
 export type PrintReceiptParams = {
   price: number;
@@ -11,6 +18,7 @@ export type PrintReceiptParams = {
   paymentType: TransactionType;
   paybackPeriod: number;
 };
+
 export type PrintBalanceParams = Omit<PrintReceiptParams, 'price'> & {
   balance: number;
   cardNumber: string;

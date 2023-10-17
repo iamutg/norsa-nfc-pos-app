@@ -1,11 +1,15 @@
 import {NativeModules} from 'react-native';
-import {
-  FailureResult,
-  PosPrinterModule,
-  PrinterConfig,
-  SuccessResult,
-} from '~/types';
+import {FailureResult, PrinterConfig, SuccessResult} from '~/types';
 import {LocalStorageService} from '~/core/LocalStorageService';
+
+export interface PosPrinterModule {
+  print: (
+    textToBePrinted: string,
+    printerDpi: number,
+    printerWidthMM: number,
+    printerNbrCharactersPerLine: number,
+  ) => Promise<boolean>;
+}
 
 export type PosPrinterResult =
   | Omit<SuccessResult<undefined>, 'data'>

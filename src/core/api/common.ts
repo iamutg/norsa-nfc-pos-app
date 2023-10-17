@@ -164,12 +164,15 @@ async function _doApiRequest<D, R>(
   }
 }
 
-export const doApiRequest = <R extends GeneralApiResponse>(
+export const doApiRequest = <R extends GeneralApiResponse = GeneralApiResponse>(
   requestConfig: ApiRequestConfig<undefined>,
   errorHandler?: CustomErrorHandler,
 ) => _doApiRequest<undefined, R>(requestConfig, errorHandler);
 
-export const doApiRequestWithBody = <D, R extends GeneralApiResponse>(
+export const doApiRequestWithBody = <
+  D,
+  R extends GeneralApiResponse = GeneralApiResponse,
+>(
   requestConfig: ApiRequestConfig<D>,
   errorHandler?: CustomErrorHandler,
 ) => _doApiRequest<D, R>(requestConfig, errorHandler);
