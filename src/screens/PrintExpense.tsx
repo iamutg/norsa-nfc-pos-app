@@ -1,53 +1,45 @@
-import moment from 'moment';
-import React, {FC, useCallback, useState} from 'react';
+import React from 'react';
 import {Keyboard, StyleSheet, Text, TextInput, View} from 'react-native';
+import moment from 'moment';
 import {
   responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {BalanceDialog, Button, Header} from '~/components';
-import BottomModal from '~/components/BottomModal';
-import {useAuthContext} from '~/context/AuthContext';
-import {
-  doCreateTrasactionHistory,
-  doGetMultipleIssuanceHistories,
-} from '~/core/ApiService';
-import {printReceipt} from '~/core/ReceiptPrinter';
+import {BottomModal} from '~/components';
+import {ApiService} from '~/core/api';
 import {useModalState} from '~/hooks';
 import {Colors} from '~/styles';
-import {
-  AddItemsScreeProps,
-  Client,
-  IssuanceHistory,
-  Transaction,
-  TransactionType,
-} from '~/types';
 import {isValidAmount, showAlert, showToast} from '~/utils';
+import {AddItemsScreeProps} from '~/navigation';
+import {IssuanceHistory} from '~/core/api';
+import {selectLoginData, useGlobalStore} from '~/state';
 
 const merchantPinCodeModalText = 'Please Enter the Merchant Pin code';
 const defaultPinCodeModalText = 'Please Enter the Pin Code to Verify Nfc Card';
 
-export interface Props extends AddItemsScreeProps {}
+export interface PrintExpenseProps extends AddItemsScreeProps {}
 
-const PrintExpense: FC<Props> = ({route, navigation}) => {
-  const {loginData} = useAuthContext();
+export function PrintExpense({route, navigation}: PrintExpenseProps) {
+  const loginData = useGlobalStore(selectLoginData);
 
-  const [expensePrice, setExpensePrice] = useState('');
-  const [pinCode, setPinCode] = useState('');
-  const [hasPrintedForMerchant, setHasPrintedForMerchant] = useState(false);
+  const [expensePrice, setExpensePrice] = React.useState('');
+  const [pinCode, setPinCode] = React.useState('');
+  const [hasPrintedForMerchant, setHasPrintedForMerchant] =
+    React.useState(false);
   const [hasMerchantPincodeVerified, setHasMerchantPincodeVerified] =
-    useState(false);
-  const [hasPinCodeVerified, setHasPinCodeVerified] = useState(false);
-  const [disableInput, setDisableInput] = useState(false);
+    React.useState(false);
+  const [hasPinCodeVerified, setHasPinCodeVerified] = React.useState(false);
+  const [disableInput, setDisableInput] = React.useState(false);
   const [selectedIssuanceHistory, setSelectedIssuanceHistory] =
     React.useState<IssuanceHistory | null>(null);
   const [balanceDialogShown, showBalanceDialog, hideBalanceDialog] =
     useModalState();
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = React.useState(false);
   const [isConfirmationModalShown, setIsConfirmationModalShown] =
-    useState(false);
+    React.useState(false);
 
   const haveShownBalanceRef = React.useRef(false);
 
@@ -59,7 +51,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
   const paymentType = route.params?.paymentType;
   const cardId = route.params?.cardId ?? '';
 
-  const getModalText = useCallback(() => {
+  const getModalText = React.useCallback(() => {
     if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
       return merchantPinCodeModalText;
     } else {
@@ -67,23 +59,23 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     }
   }, [hasMerchantPincodeVerified, paymentType]);
 
-  const clearAllStates = useCallback(() => {
+  const clearAllStates = React.useCallback(() => {
     setExpensePrice('');
     setHasPrintedForMerchant(false);
     setDisableInput(false);
     setLoading(false);
   }, []);
 
-  const showConfirmationModal = useCallback(() => {
+  const showConfirmationModal = React.useCallback(() => {
     setIsConfirmationModalShown(true);
   }, []);
 
-  const hideConfirmationModal = useCallback(() => {
+  const hideConfirmationModal = React.useCallback(() => {
     setPinCode('');
     setIsConfirmationModalShown(false);
   }, []);
 
-  const onExpensePriceTextChanged = useCallback<(text: string) => void>(
+  const onExpensePriceTextChanged = React.useCallback<(text: string) => void>(
     text => {
       setExpensePrice(text);
     },
@@ -347,7 +339,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
       />
     </>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -452,5 +444,3 @@ const styles = StyleSheet.create({
     color: Colors.red,
   },
 });
-
-export default PrintExpense;

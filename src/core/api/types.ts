@@ -102,5 +102,6 @@ export type GetMultipleIssuanceHistoriesApiResponse = GeneralApiResponse<
   IssuanceHistoryApiResponse[]
 >;
 
-export type GetDailyTransactionsApiResponse =
-  GeneralApiResponse<DailyTransaction>;
+export type GetDailyTransactionsApiResponse = GeneralApiResponse<
+  DailyTransaction[]
+>;

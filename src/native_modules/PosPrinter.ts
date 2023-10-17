@@ -1,6 +1,12 @@
 import {NativeModules} from 'react-native';
-import {FailureResult, PrinterConfig, SuccessResult} from '~/types';
+import {FailureResult, SuccessResult} from '~/types';
 import {LocalStorageService} from '~/core/LocalStorageService';
+
+export type PrinterConfig = {
+  printerDpi: number;
+  printerWidthMM: number;
+  printerNbrCharactersPerLine: number;
+};
 
 export interface PosPrinterModule {
   print: (

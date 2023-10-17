@@ -1,5 +1,5 @@
 import type {AppMode} from '~/types';
-import type {PrinterConfig} from '~/core/ReceiptPrinter';
+import type {PrinterConfig} from '~/native_modules/PosPrinter';
 
 export enum AppEnv {
   Staging = 'Staging',
@@ -14,4 +14,4 @@ export const PrinterDefaultConfigObject: PrinterConfig = {
   printerNbrCharactersPerLine: 30,
 };
 
-export const appModes: AppMode = 'expense-retour';
+export const SelectedAppMode: AppMode = 'expense-retour';

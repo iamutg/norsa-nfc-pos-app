@@ -1,15 +1,9 @@
 import moment from 'moment';
-import {PosPrinter} from '~/native_modules/PosPrinter';
+import {PosPrinter, PrinterConfig} from '~/native_modules/PosPrinter';
 import {generateReceiptNumber} from '~/utils';
 import {LocalStorageService} from './LocalStorageService';
 import type {Client} from '~/types';
 import {TransactionType, DailyTransaction} from './api';
-
-export type PrinterConfig = {
-  printerDpi: number;
-  printerWidthMM: number;
-  printerNbrCharactersPerLine: number;
-};
 
 export type PrintReceiptParams = {
   price: number;
@@ -19,7 +13,10 @@ export type PrintReceiptParams = {
   paybackPeriod: number;
 };
 
-export type PrintBalanceParams = Omit<PrintReceiptParams, 'price'> & {
+export type PrintBalanceParams = Omit<
+  PrintReceiptParams,
+  'price' | 'paymentType'
+> & {
   balance: number;
   cardNumber: string;
 };
@@ -55,6 +52,10 @@ export const ReceiptPrinter = {
 
     console.log(textToPrinted, config);
     return PosPrinter.print(textToPrinted, config);
+  },
+  print(text: string) {
+    console.log(text);
+    return PosPrinter.print(text);
   },
   async printReceipt({
     price,

@@ -1,6 +1,4 @@
-import {Picker} from '@react-native-picker/picker';
-import moment from 'moment';
-import React, {FC, useCallback, useEffect, useRef} from 'react';
+import React from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -10,6 +8,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {Picker} from '@react-native-picker/picker';
+import moment from 'moment';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -26,63 +26,54 @@ import {
   BottomModal,
   BalanceDialog,
 } from '~/components';
-import {appModes} from '~/constants';
-import {useAuthContext} from '~/context/AuthContext';
-import {
-  doGetDailyTransactions,
-  doGetMultipleIssuanceHistories,
-} from '~/core/ApiService';
-import {
-  getDailyReportPrintedDate,
-  getPreviousPrintedReceipt,
-  setDailyReportPrintedDate,
-} from '~/core/LocalStorageService';
-import {
-  checkIfNfcEnabled,
-  cleanUpReadingListners,
-  initNfcManager,
-  readNfcTag,
-} from '~/core/NfcReaderWriter';
-import {printBalance, printDailyReceipt} from '~/core/ReceiptPrinter';
+import {SelectedAppMode} from '~/constants';
+import {ApiService, IssuanceHistory} from '~/core/api';
+import {LocalStorageService} from '~/core/LocalStorageService';
+import {NfcReaderWriter} from '~/core/NfcReaderWriter';
+import {ReceiptPrinter} from '~/core/ReceiptPrinter';
 import {useModalState} from '~/hooks';
-import {RouteName} from '~/navigation/RouteName';
+import {HomeScreenNavProp, RouteName} from '~/navigation';
 import {Colors} from '~/styles';
 import {
-  HomeScreenNavProp,
-  IssuanceHistory,
+  AppMode,
   NfcTagOperationStatus,
   NfcTagScanningReason,
   PickerItem,
 } from '~/types';
 import {getCurrentUtcTimestamp, getLocalTimestamp, showToast} from '~/utils';
-import {printText} from './../core/ReceiptPrinter';
+import {selectLoginData, useGlobalStore} from '~/state';
 
 const testCardNumber = 'K-0035';
 console.log('Test Card Number: ', testCardNumber);
 
-export interface Props {
+export interface HomeProps {
   navigation: HomeScreenNavProp;
 }
 
-const Home: FC<Props> = ({navigation: {navigate}}) => {
-  const {loginData} = useAuthContext();
+export function Home({navigation: {navigate}}: HomeProps) {
+  const loginData = useGlobalStore(selectLoginData);
 
   const [loading, setLoading] = React.useState(false);
   const [dailyReceiptPrintLoading, setDailyReceiptPrintLoading] =
     React.useState(false);
   const [printPreviousReceiptLoading, setPrintPreviousReceiptLoading] =
     React.useState(false);
-  const [bottomModalShown, setBottomModalShown] = React.useState(false);
-  const [selectPaybackPeriodModalShown, setSelectPaybackPeriodModalShown] =
-    React.useState(false);
-  const [isRetourDialogShown, openRetourDialog, closeRetourDialog] =
+  const [scanTagModalShown, showScanTagModal, hideScanTagModal] =
+    useModalState();
+  const [
+    selectPaybackPeriodModalShown,
+    showSelectPaybackPeriodModal,
+    hideSelectPaybackPeriodModal,
+  ] = useModalState();
+  const [retourDialogShown, showRetourDialog, hideRetourDialog] =
     useModalState();
   const [paybackPeriods, setPaybackPeriods] = React.useState<Array<PickerItem>>(
     [],
   );
   const [selectedPaybackPeriod, setSelectedPaybackPeriod] = React.useState('');
-  const [selectedIssuanceHistory, setSelectedIssuanceHistory] =
-    React.useState<IssuanceHistory>(null);
+  const [selectedIssuanceHistory, setSelectedIssuanceHistory] = React.useState<
+    IssuanceHistory | undefined
+  >();
   const [scanningStatus, setScanningStatus] =
     React.useState<NfcTagOperationStatus>('scanning');
   const [nfcTagScanningReason, setNfcTagScanningReason] =
@@ -93,27 +84,36 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     useModalState();
   const [loaderLoading, setLoaderLoading] = React.useState(false);
 
-  const issuanceHistoriesRef = useRef<Array<IssuanceHistory> | null>(null);
+  const issuanceHistoriesRef = React.useRef<Array<IssuanceHistory> | null>(
+    null,
+  );
 
-  useEffect(() => {
-    initNfcManager().catch(error =>
-      console.log('Error initializing nfc manager', error),
+  React.useEffect(() => {
+    NfcReaderWriter.initNfcManager().then(
+      initialized =>
+        !initialized && showToast('Unable to prepare device to scan nfc tag'),
     );
     shouldPrintDailyReceipt();
   }, []);
 
-  useEffect(() => {
-    if (scanningStatus === 'success') {
-      onReadNfcTagSuccess();
-    }
-  }, [scanningStatus]);
+  const clearAllStates = () => {
+    setLoading(false);
+    setDailyReceiptPrintLoading(false);
+    hideScanTagModal();
+    hideSelectPaybackPeriodModal();
+    setScanningStatus('scanning');
+    setError('');
+    setLoaderLoading(false);
+  };
 
   const shouldPrintDailyReceipt = async () => {
-    const _printDate = await getDailyReportPrintedDate();
-    console.log('Daily report printDate: ', _printDate);
+    const printDateRes = await LocalStorageService.getString(
+      LocalStorageService.Keys.DailyReportPrintedDate,
+    );
+    console.log('Daily report printDate: ', printDateRes);
 
-    if (_printDate) {
-      const printDate = moment(_printDate);
+    if (printDateRes.success) {
+      const printDate = moment(printDateRes.data);
       const currentDate = moment();
       const time = moment('00:00:00', 'HH:mm:ss');
 
@@ -126,55 +126,109 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
   };
 
-  const readTag = useCallback(async () => {
-    try {
-      setScanningStatus('scanning');
-      const scanningResult = await readNfcTag();
-      console.log('Nfc Tag Result', scanningResult);
+  const printDailyReport = async () => {
+    setDailyReceiptPrintLoading(true);
+    const dailyTranxRes = await ApiService.doGetDailyTransactions();
 
-      if (scanningResult.success) {
-        console.log('cardNumber', scanningResult.text);
-        setCardNumber(scanningResult.text);
-        setScanningStatus('success');
-      } else {
-        setError(scanningResult.error);
-        setScanningStatus('error');
+    if (dailyTranxRes.success) {
+      const currentTimestamp = getLocalTimestamp(getCurrentUtcTimestamp());
+
+      if (dailyTranxRes.data?.data?.length === 0) {
+        showToast('There are no transactions to be printed');
+        setDailyReceiptPrintLoading(false);
+        LocalStorageService.setString(
+          LocalStorageService.Keys.DailyReportPrintedDate,
+          currentTimestamp.toString(),
+        );
+        return;
       }
-    } catch (error) {
-      console.log('Error Reading Nfc', error);
-    }
-  }, []);
 
-  const onReadNfcTagSuccess = useCallback(async () => {
+      const printRes = await ReceiptPrinter.printDailyReceipt(
+        dailyTranxRes.data?.data ?? [],
+        loginData?.name ?? '',
+      );
+      setDailyReceiptPrintLoading(false);
+
+      if (printRes.success) {
+        LocalStorageService.setString(
+          LocalStorageService.Keys.DailyReportPrintedDate,
+          currentTimestamp.toString(),
+        );
+      } else {
+        console.log('Error printing daily transactions', printRes.cause);
+        showToast(printRes.message);
+      }
+    } else {
+      showToast(dailyTranxRes.message);
+    }
+  };
+
+  const readTag = async () => {
+    setScanningStatus('scanning');
+    const tagScanRes = await NfcReaderWriter.readNfcTag();
+    console.log('Nfc Tag Result', tagScanRes);
+
+    if (tagScanRes.success) {
+      console.log('cardNumber', tagScanRes.data);
+      setCardNumber(tagScanRes.data);
+      setScanningStatus('success');
+      onReadTagSuccess(tagScanRes.data);
+    } else {
+      setScanningStatus('error');
+      setError(tagScanRes.message);
+    }
+  };
+
+  const gotoExpenseScreen = (issuanceHistory?: IssuanceHistory) => {
+    navigate(RouteName.PrintExpense, {
+      client: {
+        id: issuanceHistory?.Client_id ?? '',
+        code: issuanceHistory?.clientCode ?? '',
+        name: issuanceHistory?.clientName ?? '',
+      },
+      paybackPeriod: issuanceHistory?.paybackPeriod ?? 0,
+      maxAmount: parseFloat(
+        nfcTagScanningReason === 'expense'
+          ? issuanceHistory?.Balance ?? '0'
+          : issuanceHistory?.Amount ?? '0',
+      ),
+      cardId: cardNumber,
+      pinCode: issuanceHistory?.Pincode ?? '',
+      issuanceHistoryId: issuanceHistory?.id ?? '',
+      paymentType: nfcTagScanningReason,
+    });
+  };
+
+  const onReadTagSuccess = async (cardNumber: string) => {
     clearAllStates();
     setLoaderLoading(true);
 
-    const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(
+    const issuanceHistoriesRes = await ApiService.doGetMultipleIssuaceHistories(
       cardNumber,
     );
-    console.log('Issucance Histories: ', issuanceHistoriesRes?.data);
 
     setLoaderLoading(false);
 
-    if (issuanceHistoriesRes.message) {
-      showToast(issuanceHistoriesRes?.message);
+    if (issuanceHistoriesRes.failure) {
+      showToast(issuanceHistoriesRes.message);
     } else if (issuanceHistoriesRes?.data?.length === 0) {
       showToast(
         'This person has not applied to perform payments, Please contact your dealer',
       );
-    } else {
-      const paybackPickerItems: Array<PickerItem> =
-        issuanceHistoriesRes?.data?.map(issuanceHistory => ({
+    } else if (issuanceHistoriesRes.data) {
+      const paybackPickerItems = issuanceHistoriesRes?.data?.map(
+        issuanceHistory => ({
           title: `${issuanceHistory.paybackPeriod} month${
-            issuanceHistory?.paybackPeriod > 1 ? 's' : ''
+            issuanceHistory?.paybackPeriod ?? 0 > 1 ? 's' : ''
           }`,
           value: `${issuanceHistory?.paybackPeriod}`,
-        }));
+        }),
+      );
 
       const smallestPaybackPeriod = `${
         issuanceHistoriesRes?.data
           ?.map?.(item => item.paybackPeriod)
-          ?.sort?.((a, b) => a - b)?.[0]
+          ?.sort?.((a, b) => (a ?? 0) - (b ?? 0))?.[0]
       }`;
 
       issuanceHistoriesRef.current = issuanceHistoriesRes?.data;
@@ -182,167 +236,80 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       setPaybackPeriods(paybackPickerItems);
       showSelectPaybackPeriodModal();
     }
-  }, [cardNumber]);
-
-  const showBottomModal = useCallback(async () => {
-    try {
-      setLoading(true);
-      const isEnabled = await checkIfNfcEnabled();
-      setLoading(false);
-      if (isEnabled) {
-        setBottomModalShown(true);
-        readTag();
-      } else {
-        Alert.alert(
-          'NFC Disabled',
-          'Nfc is disabled. Please enable Nfc and try again',
-        );
-      }
-    } catch (error) {
-      console.log('Error checking nfc status', error);
-    }
-  }, []);
-
-  const showSelectPaybackPeriodModal = useCallback(() => {
-    setSelectPaybackPeriodModalShown(true);
-  }, []);
-
-  const hideSelectPaybackPeriodModal = useCallback(() => {
-    setSelectedPaybackPeriod('');
-    setSelectPaybackPeriodModalShown(false);
-  }, []);
-
-  const clearAllStates = () => {
-    setLoading(false);
-    setDailyReceiptPrintLoading(false);
-    setBottomModalShown(false);
-    setSelectPaybackPeriodModalShown(false);
-    setScanningStatus('scanning');
-    setError('');
-    setLoaderLoading(false);
   };
-
-  const hideBottomModal = useCallback(() => {
-    cleanUpReadingListners();
-    setBottomModalShown(false);
-  }, []);
-
-  const onScanNfcPressed = useCallback(async () => {
+  const onScanNfcTagForExpensePressed = async () => {
     // setCardNumber(testCardNumber);
     // setScanningStatus('success');
     setNfcTagScanningReason('expense');
-    showBottomModal();
-  }, []);
-
-  const onScanNfcForRetourPressed = useCallback(async () => {
+    onShowScanTagModal();
+  };
+  const onScanTagForRetourPressed = async () => {
     // setCardNumber(testCardNumber);
     // setScanningStatus('success');
     setNfcTagScanningReason('retour');
-    showBottomModal();
-  }, []);
-
-  const onPrintPreviousPrintedReceipt = useCallback(async () => {
+    onShowScanTagModal();
+  };
+  const onPrintPreviousPrintedReceipt = async () => {
     setPrintPreviousReceiptLoading(true);
 
-    try {
-      const previousReceipt = await getPreviousPrintedReceipt();
+    const prevReceiptRes = await LocalStorageService.getString(
+      LocalStorageService.Keys.PreviousPrintedReceipt,
+    );
 
-      if (previousReceipt !== null) {
-        await printText(previousReceipt);
-      } else {
-        showToast('There is no previous receipt');
-      }
-    } catch (error) {
-      console.log('Error printing previous printed receipt');
-      showToast(error.message);
+    if (prevReceiptRes.success && prevReceiptRes.data) {
+      await ReceiptPrinter.print(prevReceiptRes.data).then(
+        res => res.failure && showToast(res.message),
+      );
+    } else {
+      showToast('There is no previous receipt');
     }
 
     setPrintPreviousReceiptLoading(false);
-  }, []);
+  };
 
-  const onScanNfcForBalance = useCallback(async () => {
+  const onScanNfcForBalance = async () => {
     // setCardNumber(testCardNumber);
     // setScanningStatus('success');
     setNfcTagScanningReason('balance');
-    showBottomModal();
-  }, []);
-
-  const printDailyReport = useCallback(async () => {
-    setDailyReceiptPrintLoading(true);
-
-    const apiResponse = await doGetDailyTransactions();
-
-    if (apiResponse.data) {
-      const currentTimestamp = getLocalTimestamp(getCurrentUtcTimestamp());
-
-      if (apiResponse.data.length === 0) {
-        showToast('There are no transactions to be printed');
-        setDailyReceiptPrintLoading(false);
-        setDailyReportPrintedDate(currentTimestamp.toString());
-        return;
-      }
-
-      try {
-        await printDailyReceipt(apiResponse.data, loginData?.name);
-        setDailyReportPrintedDate(currentTimestamp.toString());
-      } catch (error) {
-        console.log('Error printing daily Receipt');
-        showToast(error.message);
-      }
-    } else {
-      showToast(apiResponse.message);
-    }
-
-    setDailyReceiptPrintLoading(false);
-  }, []);
-
-  const onPrintDailyReceiptPressed = useCallback(async () => {
+    onShowScanTagModal();
+  };
+  const onPrintDailyReceiptPressed = async () => {
     await printDailyReport();
-  }, []);
-
-  const onPaybackPeriodSelected = useCallback(
-    (itemValue: string, indexIndex: number) => {
-      setSelectedPaybackPeriod(itemValue);
-    },
-    [],
-  );
-
-  const onContinuePressed = useCallback(() => {
-    closeRetourDialog();
-    onScanNfcForRetourPressed();
-  }, []);
-
-  const gotoExpenseScreen = useCallback(
-    (issuanceHistory: IssuanceHistory) => {
-      navigate(RouteName.PrintExpense, {
-        client: {
-          id: issuanceHistory?.Client_id,
-          code: issuanceHistory?.clientCode,
-          name: issuanceHistory?.clientName,
-        },
-        paybackPeriod: issuanceHistory?.paybackPeriod,
-        maxAmount: parseFloat(
-          nfcTagScanningReason === 'expense'
-            ? issuanceHistory?.Balance
-            : issuanceHistory?.Amount,
-        ),
-        cardId: cardNumber,
-        pinCode: issuanceHistory?.Pincode,
-        issuanceHistoryId: issuanceHistory?.id,
-        paymentType: nfcTagScanningReason,
-      });
-    },
-    [cardNumber, nfcTagScanningReason, navigate],
-  );
-
-  const onSelectPaybackPeriodNextButtonPressed = useCallback(() => {
+  };
+  const onShowScanTagModal = async () => {
+    setLoading(true);
+    const enabled = await NfcReaderWriter.checkIfNfcEnabled();
+    setLoading(false);
+    if (enabled) {
+      showScanTagModal();
+    } else {
+      Alert.alert(
+        'NFC Disabled',
+        'Nfc is disabled. Please enable Nfc and try again',
+      );
+    }
+  };
+  const onHideScanTagModal = () => {
+    hideScanTagModal();
+    NfcReaderWriter.cleanUpReadingListners();
+  };
+  const onHideSelectPaybackPeriodModal = () => {
+    setSelectedPaybackPeriod('');
+    hideSelectPaybackPeriodModal();
+  };
+  const onContinueToRetourPressed = () => {
+    hideRetourDialog();
+    onScanTagForRetourPressed();
+  };
+  const onSelectPaybackPeriodNextButtonPressed = () => {
     if (selectedPaybackPeriod && selectedPaybackPeriod !== 'none') {
       const paybackPeriodIndex = issuanceHistoriesRef.current?.findIndex(
         issuanceHistory =>
           `${issuanceHistory.paybackPeriod}` === selectedPaybackPeriod,
       );
-      const issuanceHistory = issuanceHistoriesRef.current[paybackPeriodIndex];
-      hideSelectPaybackPeriodModal();
+      const issuanceHistory =
+        issuanceHistoriesRef.current?.[paybackPeriodIndex ?? 0];
+      onHideSelectPaybackPeriodModal();
 
       if (nfcTagScanningReason === 'balance') {
         setSelectedIssuanceHistory(issuanceHistory);
@@ -353,112 +320,94 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     } else {
       showToast('Please select payback period');
     }
-  }, [selectedPaybackPeriod, nfcTagScanningReason, cardNumber]);
-
-  const onTryAgainPressed = useCallback(() => {
-    readTag();
-  }, []);
-
+  };
   const onPrintBalancePressed = async () => {
-    try {
-      const balance = parseFloat(selectedIssuanceHistory?.Balance);
-
-      await printBalance(
-        {
-          id: selectedIssuanceHistory?.Client_id,
-          code: selectedIssuanceHistory?.clientCode,
-          name: selectedIssuanceHistory?.clientName,
-        },
-        cardNumber,
-        loginData?.name,
-        balance,
-        selectedIssuanceHistory?.paybackPeriod ?? 0,
-      );
-    } catch (error) {
-      console.log('Error printing Balance');
-      showToast(error.message);
-    }
+    const balance = parseFloat(selectedIssuanceHistory?.Balance ?? '0');
+    ReceiptPrinter.printBalance({
+      balance,
+      customer: {
+        id: selectedIssuanceHistory?.Client_id ?? '',
+        code: selectedIssuanceHistory?.clientCode ?? '',
+        name: selectedIssuanceHistory?.clientName ?? '',
+      },
+      cardNumber,
+      merchantName: loginData?.name ?? '',
+      paybackPeriod: selectedIssuanceHistory?.paybackPeriod ?? 0,
+    }).then(res => {
+      if (res.failure) {
+        console.log('Error printing balance', res.cause);
+        showToast(res.message);
+      }
+    });
   };
 
-  const renderNfcScanning = useCallback(() => {
+  const ButtonsMap: {[key in AppMode]: React.ReactNode} = {
+    'expense-retour': (
+      <>
+        <Button
+          title="Expense"
+          style={styles.scanNfcBtn}
+          loading={loading}
+          onPress={onScanNfcTagForExpensePressed}
+        />
+        <Button
+          title="Retour"
+          style={styles.scanNfcBtn}
+          onPress={showRetourDialog}
+        />
+      </>
+    ),
+    expense: (
+      <Button
+        title="Expense"
+        style={styles.scanNfcBtn}
+        loading={loading}
+        onPress={onScanNfcTagForExpensePressed}
+      />
+    ),
+    retour: (
+      <Button
+        title="Retour"
+        style={styles.scanNfcBtn}
+        onPress={showRetourDialog}
+      />
+    ),
+  };
+
+  const renderNfcScanning = () => {
     return (
       <View style={styles.nfcContentContainer}>
         <ActivityIndicator animating color={Colors.primary} size="large" />
         <Text style={styles.scanningNfcText}>Scanning Nearby NFC card</Text>
       </View>
     );
-  }, []);
-
-  const renderTryAgain = useCallback(() => {
+  };
+  const renderTryAgain = () => {
     return (
       <View style={styles.nfcContentContainer}>
         <Text style={styles.tryAgainText}>{error}</Text>
-        <Button title="Try Again" onPress={onTryAgainPressed} />
+        <Button title="Try Again" onPress={readTag} />
       </View>
     );
-  }, [error]);
-
-  const renderModalContent = useCallback(() => {
+  };
+  const renderModalContent = () => {
     if (scanningStatus === 'scanning') {
       return renderNfcScanning();
-    } else {
+    } else if (scanningStatus === 'error') {
       return renderTryAgain();
-    }
-  }, [scanningStatus]);
-
-  const renderButtons = useCallback(() => {
-    if (appModes === 'expense-retour') {
-      return (
-        <>
-          <Button
-            title="Expense"
-            style={styles.scanNfcBtn}
-            loading={loading}
-            onPress={onScanNfcPressed}
-          />
-          <Button
-            title="Retour"
-            style={styles.scanNfcBtn}
-            onPress={openRetourDialog}
-          />
-        </>
-      );
-    } else if (appModes === 'expense') {
-      return (
-        <>
-          <Button
-            title="Expense"
-            style={styles.scanNfcBtn}
-            loading={loading}
-            onPress={onScanNfcPressed}
-          />
-        </>
-      );
     } else {
-      return (
-        <>
-          <Button
-            title="Retour"
-            style={styles.scanNfcBtn}
-            onPress={onScanNfcForRetourPressed}
-          />
-        </>
-      );
+      return null;
     }
-  }, []);
-
-  const renderPaybackPeriodItems = useCallback(
-    () =>
-      paybackPeriods.map((paybackPeriod, index) => (
-        <Picker.Item
-          key={index}
-          label={paybackPeriod.title}
-          value={paybackPeriod.value}
-          color={Colors.black}
-        />
-      )),
-    [paybackPeriods],
-  );
+  };
+  const renderPaybackPeriodItems = () =>
+    paybackPeriods.map((paybackPeriod, index) => (
+      <Picker.Item
+        key={index}
+        label={paybackPeriod.title}
+        value={paybackPeriod.value}
+        color={Colors.black}
+      />
+    ));
 
   return (
     <ScreenContainer>
@@ -466,7 +415,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
-          {renderButtons()}
+          {ButtonsMap[SelectedAppMode]}
           <Button
             title="Show Balance"
             style={styles.scanNfcBtn}
@@ -480,11 +429,11 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           />
         </View>
       </View>
-      <BottomModal visible={bottomModalShown}>
+      <BottomModal visible={scanTagModalShown}>
         <View style={styles.modalContainer}>
           <TouchableOpacity
             style={styles.closeBottomModalBtn}
-            onPress={hideBottomModal}>
+            onPress={onHideScanTagModal}>
             <Icons.MaterialIcons
               name="close"
               color={Colors.black}
@@ -502,7 +451,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           ]}>
           <TouchableOpacity
             style={styles.closeBottomModalBtn}
-            onPress={hideSelectPaybackPeriodModal}>
+            onPress={onHideSelectPaybackPeriodModal}>
             <Icons.MaterialIcons
               name="close"
               color={Colors.black}
@@ -516,7 +465,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             style={styles.paybackPeriodPicker}
             mode="dropdown"
             selectedValue={selectedPaybackPeriod}
-            onValueChange={onPaybackPeriodSelected}>
+            onValueChange={setSelectedPaybackPeriod}>
             <Picker.Item
               label="Select Payback Period"
               value="none"
@@ -532,7 +481,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         </View>
       </BottomModal>
       <Loader visible={loaderLoading} />
-      <Dialog.Container visible={isRetourDialogShown}>
+      <Dialog.Container visible={retourDialogShown}>
         <Dialog.Title>
           <Text style={styles.retourDialogTitleText}>Retour</Text>
         </Dialog.Title>
@@ -542,9 +491,9 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         <Dialog.Button
           label="Cancel"
           color={Colors.red}
-          onPress={closeRetourDialog}
+          onPress={hideRetourDialog}
         />
-        <Dialog.Button label="Continue" onPress={onContinuePressed} />
+        <Dialog.Button label="Continue" onPress={onContinueToRetourPressed} />
       </Dialog.Container>
       <BalanceDialog
         visible={balanceDialogShown}
@@ -565,7 +514,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       />
     </ScreenContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -662,5 +611,3 @@ const styles = StyleSheet.create({
     color: Colors.red,
   },
 });
-
-export default Home;
