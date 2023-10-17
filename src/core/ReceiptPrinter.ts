@@ -25,9 +25,36 @@ export type PrintBalanceParams = Omit<PrintReceiptParams, 'price'> & {
 };
 
 export const ReceiptPrinter = {
-  async print(text: string) {
-    console.log(text);
-    return PosPrinter.print(text);
+  async testPrint(testAmount: string, config: PrinterConfig) {
+    const textToPrinted =
+      "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
+      '[L]\n' +
+      `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
+      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
+      '[L]\n' +
+      '[C]================================\n' +
+      '[L]\n' +
+      `[L]Sale Amount :[R]NAFL ${testAmount}\n` +
+      '[L]\n' +
+      '[C]================================\n' +
+      '[L]\n' +
+      "[L]<font size='tall'>Merchant :</font>\n" +
+      '[L]Jake Gill\n' +
+      "[L]<font size='tall'>Customer :</font>\n" +
+      `[L]${'Max'} ${'Norton'}\n` +
+      `[L]${'123'}\n` +
+      '[L]\n' +
+      '[L]\n' +
+      "[L]<font size='tall'>Signature :</font>\n" +
+      '[L]\n' +
+      '[L]\n' +
+      '[L]--------------------------------\n' +
+      '[L]\n' +
+      '[L]Thank you for your purchase\n' +
+      '[L]For questions or inquiries call customer service : +5999 767-1563';
+
+    console.log(textToPrinted, config);
+    return PosPrinter.print(textToPrinted, config);
   },
   async printReceipt({
     price,

@@ -1,5 +1,4 @@
-import React, {FC, useCallback, useState, useEffect} from 'react';
-import moment from 'moment';
+import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {TextInput} from 'react-native-gesture-handler';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
@@ -9,47 +8,44 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {Button, Header, Loader, ScreenContainer} from '~/components';
-import {print, printWithConfig} from '~/native_modules/PosPrinter';
-import {Colors} from '~/styles';
-import {isValidFloatNumber, printerDefaultConfig, showAlert} from '~/utils';
 import {
-  getPrinterDefaultConfig,
-  setPrinterDefaultConfig,
-} from '~/core/LocalStorageService';
-import {PrinterConfig as TPrinterConfig} from '~/types';
-import {showToast} from './../utils/index';
+  ReceiptPrinter,
+  PrinterConfig as TPrinterConfig,
+} from '~/core/ReceiptPrinter';
+import {Colors} from '~/styles';
+import {isValidFloatNumber, showAlert, showToast} from '~/utils';
+import {LocalStorageService} from '~/core/LocalStorageService';
+import {PrinterDefaultConfigObject} from '~/constants';
 
-export interface Props {}
-
-const PrinterConfig: FC<Props> = ({}) => {
-  const [loading, setLoading] = useState(true);
-  const [printerDpi, setPrinterDpi] = useState('');
-  const [printerWidthMM, setPrinterWidthMM] = useState('');
+export function PrinterConfig() {
+  const [loading, setLoading] = React.useState(true);
+  const [printerDpi, setPrinterDpi] = React.useState('');
+  const [printerWidthMM, setPrinterWidthMM] = React.useState('');
   const [printerNbrCharactersPerLine, setPrinterNbrCharactersPerLine] =
-    useState('');
-  const [expenseAmount, setExpenseAmount] = useState('');
+    React.useState('');
+  const [expenseAmount, setExpenseAmount] = React.useState('');
 
-  useEffect(() => {
+  React.useEffect(() => {
     (async () => {
-      const config = await getPrinterDefaultConfig();
+      const config = await LocalStorageService.getPrinterDefaultConfig();
       setConfig(config);
       setLoading(false);
     })();
   }, []);
 
-  const setConfig = useCallback((config: TPrinterConfig) => {
+  const setConfig = (config: TPrinterConfig) => {
     setPrinterDpi(config.printerDpi.toString());
     setPrinterWidthMM(config.printerWidthMM.toString());
     setPrinterNbrCharactersPerLine(
       config.printerNbrCharactersPerLine.toString(),
     );
-  }, []);
+  };
 
-  const onPrintPressed = useCallback(async () => {
+  const onPrintPressed = async () => {
     const _dpi = printerDpi.trim();
     const _widthMM = printerWidthMM.trim();
     const _charactersPerLine = printerNbrCharactersPerLine.trim();
-    const _expenseAmount = expenseAmount.trim() || 100;
+    const _expenseAmount = expenseAmount.trim() || '100';
 
     if (_dpi === '' || !isValidFloatNumber(_dpi) || parseFloat(_dpi) === 0) {
       showAlert('Invalid', 'Dpi is invalid');
@@ -72,52 +68,25 @@ const PrinterConfig: FC<Props> = ({}) => {
       return;
     }
 
-    const textToPrinted =
-      "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
-      '[L]\n' +
-      `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
-      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
-      `[L]\n` +
-      '[C]================================\n' +
-      '[L]\n' +
-      `[L]Sale Amount :[R]NAFL ${_expenseAmount}\n` +
-      '[L]\n' +
-      '[C]================================\n' +
-      '[L]\n' +
-      "[L]<font size='tall'>Merchant :</font>\n" +
-      '[L]Jake Gill\n' +
-      "[L]<font size='tall'>Customer :</font>\n" +
-      `[L]${'Max'} ${'Norton'}\n` +
-      `[L]${'123'}\n` +
-      `[L]\n` +
-      `[L]\n` +
-      "[L]<font size='tall'>Signature :</font>\n" +
-      `[L]\n` +
-      `[L]\n` +
-      `[L]--------------------------------\n` +
-      `[L]\n` +
-      `[L]Thank you for your purchase\n` +
-      `[L]For questions or inquiries call customer service : +5999 767-1563`;
+    const dpi = parseFloat(_dpi);
+    const widthMM = parseFloat(_widthMM);
+    const nbrCharactersPerLine = parseFloat(_charactersPerLine);
+    const config: TPrinterConfig = {
+      printerDpi: dpi,
+      printerWidthMM: widthMM,
+      printerNbrCharactersPerLine: nbrCharactersPerLine,
+    };
 
-    try {
-      const dpi = parseFloat(_dpi);
-      const widthMM = parseFloat(_widthMM);
-      const nbrCharactersPerLine = parseFloat(_charactersPerLine);
-      const config: TPrinterConfig = {
-        printerDpi: dpi,
-        printerWidthMM: widthMM,
-        printerNbrCharactersPerLine: nbrCharactersPerLine,
-      };
+    setLoading(true);
+    const printRes = await ReceiptPrinter.testPrint(_expenseAmount, config);
+    setLoading(false);
 
-      console.log('Text', textToPrinted);
-      await printWithConfig(textToPrinted, config);
-    } catch (error) {
-      console.log('Error Printing', error);
-      showAlert('Error', error.message);
+    if (printRes.failure) {
+      showAlert('Error', `Print error ${printRes.message}`);
     }
-  }, [printerDpi, printerWidthMM, printerNbrCharactersPerLine, expenseAmount]);
+  };
 
-  const onSaveConfigPressed = useCallback(async () => {
+  const onSaveConfigPressed = async () => {
     const _dpi = printerDpi.trim();
     const _widthMM = printerWidthMM.trim();
     const _charactersPerLine = printerNbrCharactersPerLine.trim();
@@ -148,23 +117,30 @@ const PrinterConfig: FC<Props> = ({}) => {
     const nbrCharactersPerLine = parseFloat(_charactersPerLine);
 
     setLoading(true);
-    await setPrinterDefaultConfig({
-      printerDpi: dpi,
-      printerWidthMM: widthMM,
-      printerNbrCharactersPerLine: nbrCharactersPerLine,
-    });
-    showToast('Printer settings saved');
+    await LocalStorageService.setObject(
+      LocalStorageService.Keys.PrinterDefaultConfig,
+      {
+        printerDpi: dpi,
+        printerWidthMM: widthMM,
+        printerNbrCharactersPerLine: nbrCharactersPerLine,
+      },
+    );
     setLoading(false);
-  }, [printerDpi, printerWidthMM, printerNbrCharactersPerLine]);
 
-  const onResetButtonPressed = useCallback(async () => {
+    showToast('Printer settings saved');
+  };
+
+  const onResetButtonPressed = async () => {
     setLoading(true);
-    setConfig(printerDefaultConfig);
+    setConfig(PrinterDefaultConfigObject);
     setExpenseAmount('');
-    setPrinterDefaultConfig(printerDefaultConfig);
+    LocalStorageService.setObject(
+      LocalStorageService.Keys.PrinterDefaultConfig,
+      PrinterDefaultConfigObject,
+    );
     showToast('Printer config reset');
     setLoading(false);
-  }, []);
+  };
 
   return (
     <ScreenContainer>
@@ -246,7 +222,7 @@ const PrinterConfig: FC<Props> = ({}) => {
       </KeyboardAwareScrollView>
     </ScreenContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -286,5 +262,3 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
 });
-
-export default PrinterConfig;
