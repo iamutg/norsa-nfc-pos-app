@@ -14,7 +14,7 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import {useAuthContext} from '~/context/AuthContext';
-import {routeNames} from '~/navigation/routeNames';
+import {RouteName} from '~/navigation/RouteName';
 import {Colors} from '~/styles';
 import {HomeScreenNavProp} from '~/types';
 import {showAlertWithTwoButtons, noop} from './../utils/index';
@@ -55,7 +55,7 @@ const Header: FC<Props> = ({
   }, []);
 
   const onSettingsIconPressed = useCallback(() => {
-    navigation.navigate(routeNames.PrinterConfig);
+    navigation.navigate(RouteName.PrinterConfig);
   }, []);
 
   return (

@@ -45,7 +45,7 @@ import {
 } from '~/core/NfcReaderWriter';
 import {printBalance, printDailyReceipt} from '~/core/ReceiptPrinter';
 import {useModalState} from '~/hooks';
-import {routeNames} from '~/navigation/routeNames';
+import {RouteName} from '~/navigation/RouteName';
 import {Colors} from '~/styles';
 import {
   HomeScreenNavProp,
@@ -314,7 +314,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
 
   const gotoExpenseScreen = useCallback(
     (issuanceHistory: IssuanceHistory) => {
-      navigate(routeNames.PrintExpense, {
+      navigate(RouteName.PrintExpense, {
         client: {
           id: issuanceHistory?.Client_id,
           code: issuanceHistory?.clientCode,

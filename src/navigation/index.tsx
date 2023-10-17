@@ -1,42 +1,33 @@
-import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {useAuthContext} from '~/context/AuthContext';
+import {createStackNavigator} from '@react-navigation/stack';
 import {PrintExpense, Home, Login, Splash, PrinterConfig} from '~/screens';
-import {RootStackParamList} from '~/types';
 import {stackScreenOptions} from './config';
-import {routeNames} from './routeNames';
+import {selectLoggedIn, selectSplashLodaing, useGlobalStore} from '~/state';
+import {RootStackParamList, RouteName} from './types';
 
 const RootStack = createStackNavigator<RootStackParamList>();
 
-const RootNav = () => {
-  const {isLoading, isLoggedIn} = useAuthContext();
+export function RootNavigator() {
+  const splashLoading = useGlobalStore(selectSplashLodaing);
+  const loggedIn = useGlobalStore(selectLoggedIn);
 
   const renderScreens = () => {
-    // return (
-    //   <>
-    //     <RootStack.Screen
-    //       name={routeNames.PrintExpense}
-    //       component={PrintExpense}
-    //     />
-    //   </>
-    // );
-
-    if (isLoading) {
+    if (splashLoading) {
       return (
         <>
-          <RootStack.Screen name={routeNames.Splash} component={Splash} />
+          <RootStack.Screen name={RouteName.Splash} component={Splash} />
         </>
       );
-    } else if (isLoggedIn) {
+    } else if (loggedIn) {
       return (
         <>
-          <RootStack.Screen name={routeNames.Home} component={Home} />
+          <RootStack.Screen name={RouteName.Home} component={Home} />
           <RootStack.Screen
-            name={routeNames.PrintExpense}
+            name={RouteName.PrintExpense}
             component={PrintExpense}
           />
           <RootStack.Screen
-            name={routeNames.PrinterConfig}
+            name={RouteName.PrinterConfig}
             component={PrinterConfig}
           />
         </>
@@ -44,7 +35,7 @@ const RootNav = () => {
     } else {
       return (
         <>
-          <RootStack.Screen name={routeNames.Login} component={Login} />
+          <RootStack.Screen name={RouteName.Login} component={Login} />
         </>
       );
     }
@@ -55,6 +46,6 @@ const RootNav = () => {
       {renderScreens()}
     </RootStack.Navigator>
   );
-};
+}
 
-export default RootNav;
+export * from './types';
