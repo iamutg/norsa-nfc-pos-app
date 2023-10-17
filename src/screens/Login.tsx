@@ -1,6 +1,5 @@
-import React, {FC, useRef, useState, useCallback} from 'react';
-import {Image, Keyboard, StyleSheet, View} from 'react-native';
-import {TextInput} from 'react-native-gesture-handler';
+import React from 'react';
+import {Image, Keyboard, StyleSheet, View, TextInput} from 'react-native';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -8,30 +7,24 @@ import {
 } from 'react-native-responsive-dimensions';
 import {logo} from '~/assets/images';
 import {Button, ScreenContainer} from '~/components';
+import {ApiService} from '~/core/api';
+import {useGlobalStore} from '~/state';
 import {Colors} from '~/styles';
-import {useAuthContext} from '~/context/AuthContext';
 import {isEmailValid, showAlert} from '~/utils';
 
-export interface Props {}
+export function Login() {
+  const {setLoggedIn, setLoginData} = useGlobalStore();
 
-const Login: FC<Props> = ({}) => {
-  const {login, onLoginSuccess} = useAuthContext();
+  const [loading, setLoading] = React.useState(false);
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
 
-  const passwordTextInpurRef = useRef<TextInput>();
+  const passwordTextInpurRef = React.useRef<TextInput>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-
-  const onEmailTextChange = useCallback((text: string) => setEmail(text), []);
-  const onPasswordTextChange = useCallback(
-    (text: string) => setPassword(text),
-    [],
-  );
-  const onUsernameEndEditing = useCallback(() => {
-    passwordTextInpurRef.current.focus();
-  }, []);
-  const onLoginPressed = useCallback(async () => {
+  const onUsernameEndEditing = () => {
+    passwordTextInpurRef.current?.focus();
+  };
+  const onLoginPressed = async () => {
     Keyboard.dismiss();
 
     const _email = email.trim();
@@ -58,16 +51,16 @@ const Login: FC<Props> = ({}) => {
     }
 
     setLoading(true);
-    const loginResponse = await login(_email, _password);
-    console.log(loginResponse);
+    const loginRes = await ApiService.doLogin(email, password);
+    setLoading(false);
 
-    if (loginResponse.data) {
-      onLoginSuccess(loginResponse.data);
+    if (loginRes.success) {
+      setLoginData(loginRes.data?.data);
+      setLoggedIn(true);
     } else {
-      setLoading(false);
-      showAlert('Error', loginResponse.message);
+      showAlert('Error', loginRes.message);
     }
-  }, [email, password]);
+  };
 
   return (
     <ScreenContainer style={styles.container}>
@@ -78,7 +71,7 @@ const Login: FC<Props> = ({}) => {
           value={email}
           placeholder="Email"
           onEndEditing={onUsernameEndEditing}
-          onChangeText={onEmailTextChange}
+          onChangeText={setEmail}
           keyboardType="email-address"
           returnKeyType="next"
         />
@@ -89,7 +82,7 @@ const Login: FC<Props> = ({}) => {
           value={password}
           placeholder="Password"
           secureTextEntry
-          onChangeText={onPasswordTextChange}
+          onChangeText={setPassword}
           returnKeyType="done"
         />
         <Button
@@ -101,7 +94,7 @@ const Login: FC<Props> = ({}) => {
       </View>
     </ScreenContainer>
   );
-};
+}
 
 const styles = StyleSheet.create({
   f1: {
@@ -134,5 +127,3 @@ const styles = StyleSheet.create({
     marginTop: responsiveHeight(4),
   },
 });
-
-export default Login;

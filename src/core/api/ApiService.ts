@@ -49,7 +49,7 @@ export const ApiService = {
     if (loginRes.data?.data?.name) {
       loginRes.data.data.name = merchantNameRes.data?.data?.Name;
     }
-    return loginRes.data?.data;
+    return createApiSuccessResult({data: loginRes.data});
   },
   doGetMultipleIssuaceHistories: async (cardId: string) => {
     const multiIssuanceHistoriesRes = await doApiRequestWithBody<
