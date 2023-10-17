@@ -156,6 +156,8 @@ async function _doApiRequest<D, R>(
       case HttpMethod.Delete:
         response = await doDelete<R, D>(requestConfig);
         break;
+      default:
+        throw new Error('Invalid Http Method');
     }
 
     return createApiSuccessResult({data: response.data});
