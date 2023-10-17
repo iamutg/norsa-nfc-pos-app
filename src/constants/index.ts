@@ -1,4 +1,5 @@
-import {AppMode, PrinterConfig} from '~/types';
+import type {AppMode} from '~/types';
+import type {PrinterConfig} from '~/core/ReceiptPrinter';
 
 export enum AppEnv {
   Staging = 'Staging',
