@@ -69,8 +69,8 @@ export type IssuanceHistoryApiResponse = {
 };
 
 export enum TransactionType {
-  expense = 1,
-  retour = 2,
+  Expense = 1,
+  Retour = 2,
 }
 
 export type Transaction = {

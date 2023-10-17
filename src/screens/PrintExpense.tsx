@@ -8,13 +8,15 @@ import {
 } from 'react-native-responsive-dimensions';
 import {BalanceDialog, Button, Header} from '~/components';
 import {BottomModal} from '~/components';
-import {ApiService} from '~/core/api';
+import {ApiService, Transaction, TransactionType} from '~/core/api';
 import {useModalState} from '~/hooks';
 import {Colors} from '~/styles';
 import {isValidAmount, showAlert, showToast} from '~/utils';
 import {AddItemsScreeProps} from '~/navigation';
 import {IssuanceHistory} from '~/core/api';
 import {selectLoginData, useGlobalStore} from '~/state';
+import {Client} from '~/types';
+import {ReceiptPrinter} from '~/core/ReceiptPrinter';
 
 const merchantPinCodeModalText = 'Please Enter the Merchant Pin code';
 const defaultPinCodeModalText = 'Please Enter the Pin Code to Verify Nfc Card';
@@ -32,14 +34,15 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
     React.useState(false);
   const [hasPinCodeVerified, setHasPinCodeVerified] = React.useState(false);
   const [disableInput, setDisableInput] = React.useState(false);
-  const [selectedIssuanceHistory, setSelectedIssuanceHistory] =
-    React.useState<IssuanceHistory | null>(null);
+  const [selectedIssuanceHistory, setSelectedIssuanceHistory] = React.useState<
+    IssuanceHistory | undefined
+  >();
   const [balanceDialogShown, showBalanceDialog, hideBalanceDialog] =
     useModalState();
 
   const [loading, setLoading] = React.useState(false);
-  const [isConfirmationModalShown, setIsConfirmationModalShown] =
-    React.useState(false);
+  const [confirmationModalShown, showConfirmationModal, hideConfirmationModal] =
+    useModalState();
 
   const haveShownBalanceRef = React.useRef(false);
 
@@ -51,127 +54,114 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
   const paymentType = route.params?.paymentType;
   const cardId = route.params?.cardId ?? '';
 
-  const getModalText = React.useCallback(() => {
+  const clearAllStates = () => {
+    setExpensePrice('');
+    setHasPrintedForMerchant(false);
+    setDisableInput(false);
+    setLoading(false);
+  };
+
+  const getModalText = () => {
     if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
       return merchantPinCodeModalText;
     } else {
       return defaultPinCodeModalText;
     }
-  }, [hasMerchantPincodeVerified, paymentType]);
-
-  const clearAllStates = React.useCallback(() => {
-    setExpensePrice('');
-    setHasPrintedForMerchant(false);
-    setDisableInput(false);
-    setLoading(false);
-  }, []);
-
-  const showConfirmationModal = React.useCallback(() => {
-    setIsConfirmationModalShown(true);
-  }, []);
-
-  const hideConfirmationModal = React.useCallback(() => {
-    setPinCode('');
-    setIsConfirmationModalShown(false);
-  }, []);
-
-  const onExpensePriceTextChanged = React.useCallback<(text: string) => void>(
-    text => {
-      setExpensePrice(text);
-    },
-    [],
-  );
+  };
 
   const printForMerchant = async (price: number) => {
     setDisableInput(true);
     setLoading(true);
 
+    const transactionType =
+      paymentType === 'expense'
+        ? TransactionType.Expense
+        : TransactionType.Retour;
     const transaction: Transaction = {
       Client_id: client.id,
       ItemDescription: paymentType === 'expense' ? 'Expense' : 'Retour',
-      Merchant_ID: loginData?.id,
+      Merchant_ID: loginData?.id ?? '',
       issuancehistoryId: issuanceHistoryId,
       dateTime: moment().utc().toDate().toUTCString(),
       AmountUser: price,
-      transactionType:
-        paymentType === 'expense'
-          ? TransactionType.expense
-          : TransactionType.retour,
+      transactionType,
     };
     console.log('Transaction: ', transaction);
-    const res = await doCreateTrasactionHistory(transaction);
 
-    if (res.success) {
-      await printReceipt(
+    const createTraxRes = await ApiService.doCreateTransaction(transaction);
+
+    if (createTraxRes.success) {
+      ReceiptPrinter.printReceipt({
         price,
-        client,
-        loginData?.name,
-        paymentType === 'expense'
-          ? TransactionType.expense
-          : TransactionType.retour,
+        customer: client,
+        merchantName: loginData?.name ?? '',
+        paymentType: transactionType,
         paybackPeriod,
-      );
+      });
       setHasPrintedForMerchant(true);
       setLoading(false);
     } else {
       setLoading(false);
-      showToast(res.message);
+      showToast(createTraxRes.message);
       setDisableInput(false);
     }
   };
-
   const printExpenseReceipt = async (price: number) => {
-    try {
-      if (!hasPinCodeVerified) {
-        showConfirmationModal();
+    if (!hasPinCodeVerified) {
+      showConfirmationModal();
+      return;
+    }
+
+    if (hasPrintedForMerchant) {
+      setLoading(true);
+      const printRes = await ReceiptPrinter.printReceipt({
+        price,
+        customer: client,
+        merchantName: loginData?.name ?? '',
+        paymentType:
+          paymentType === 'expense'
+            ? TransactionType.Expense
+            : TransactionType.Retour,
+        paybackPeriod,
+      });
+
+      if (printRes.success) {
+        clearAllStates();
+        navigation.goBack();
         return;
       }
 
-      if (hasPrintedForMerchant) {
-        setLoading(true);
-
-        try {
-          await printReceipt(
-            price,
-            client,
-            loginData?.name,
-            paymentType === 'expense'
-              ? TransactionType.expense
-              : TransactionType.retour,
-            paybackPeriod,
-          );
-          const tId = setTimeout(() => {
-            clearTimeout(tId);
-            clearAllStates();
-            navigation.goBack();
-          }, 1000);
-        } catch (error) {
-          console.log('Error printing Receipt');
-
-          showAlert('Error', error.message);
-          setDisableInput(false);
-        }
-      } else {
-        await printForMerchant(price);
-      }
-    } catch (error) {
-      console.log('Error printing Receipt: ', error);
-      showAlert('Error Printing', error?.message || 'Something went wrong');
+      showAlert('Error', printRes.message);
+      setDisableInput(false);
+    } else {
+      await printForMerchant(price);
     }
   };
 
   const showBalance = async () => {
     setLoading(true);
-    const issuanceHistoriesRes = await doGetMultipleIssuanceHistories(cardId);
-    const issuanceHistory = issuanceHistoriesRes.data?.find(
-      issuanceHistory => issuanceHistory.paybackPeriod === paybackPeriod,
+    const issuanceHistoriesRes = await ApiService.doGetMultipleIssuaceHistories(
+      cardId,
     );
     setLoading(false);
 
-    setSelectedIssuanceHistory(issuanceHistory);
-    showBalanceDialog();
+    if (issuanceHistoriesRes.success) {
+      const issuanceHistory = issuanceHistoriesRes.data?.find(
+        issuanceHistory => issuanceHistory.paybackPeriod === paybackPeriod,
+      );
+      setSelectedIssuanceHistory(issuanceHistory);
+      showBalanceDialog();
+    } else {
+      showToast(
+        `Unable to get payback periods: ${issuanceHistoriesRes.message}`,
+      );
+    }
   };
 
+  const onHideConfirmationModal = () => {
+    setPinCode('');
+    hideConfirmationModal();
+  };
   const onSubmitButtonPressed = async () => {
     if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
       if (pinCode === loginData?.pinCode) {
@@ -183,7 +173,7 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
     } else {
       if (pinCode === pinCodeToVerify) {
         setHasPinCodeVerified(true);
-        hideConfirmationModal();
+        onHideConfirmationModal();
 
         setLoading(true);
         const price = parseFloat(expensePrice.trim());
@@ -194,7 +184,6 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
       }
     }
   };
-
   const onPrintExpenseReceipt = (price: number) => {
     if (haveShownBalanceRef.current) {
       printExpenseReceipt(price);
@@ -202,7 +191,6 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
       showBalance();
     }
   };
-
   const onSaveAndPrintReceiptPressed = () => {
     Keyboard.dismiss();
 
@@ -238,7 +226,6 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
 
     onPrintExpenseReceipt(price);
   };
-
   const onContinueTransactionPressed = () => {
     haveShownBalanceRef.current = true;
     printExpenseReceipt(parseFloat(expensePrice.trim()));
@@ -283,7 +270,7 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
               placeholder="Amount"
               returnKeyType="done"
               keyboardType="numeric"
-              onChangeText={onExpensePriceTextChanged}
+              onChangeText={setExpensePrice}
             />
           </View>
 
@@ -300,8 +287,8 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
         </View>
       </View>
       <BottomModal
-        visible={isConfirmationModalShown}
-        onBackDropPressed={hideConfirmationModal}>
+        visible={confirmationModalShown}
+        onBackDropPressed={onHideConfirmationModal}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalText}>{getModalText()}</Text>
           <TextInput

@@ -73,7 +73,7 @@ export const ReceiptPrinter = {
       '[C]==============================\n' +
       '[L]\n' +
       `[L]${
-        paymentType === TransactionType.expense ? 'Sale' : 'Retour'
+        paymentType === TransactionType.Expense ? 'Sale' : 'Retour'
       } Amount :[R]NAFL ${price.toFixed(2)}\n` +
       '[L]\n' +
       '[C]==============================\n' +
@@ -121,7 +121,7 @@ export const ReceiptPrinter = {
         return (
           prev +
           `[L]${curr.Client_id}: [R]NAFL ${
-            curr?.transactionType === TransactionType.retour ? '-' : ' '
+            curr?.transactionType === TransactionType.Retour ? '-' : ' '
           }${curr?.AmountUser?.toFixed(2)}\n` +
           `[L]Payback period (months): [R]     ${
             curr?.totalPaybackPeriods ?? 0
@@ -132,7 +132,7 @@ export const ReceiptPrinter = {
       .map(trx => trx?.AmountUser ?? 0)
       .reduce(
         (prev, curr, idx) =>
-          dailyTransactions[idx].transactionType === TransactionType.expense
+          dailyTransactions[idx].transactionType === TransactionType.Expense
             ? prev + curr
             : prev - curr,
         0,
