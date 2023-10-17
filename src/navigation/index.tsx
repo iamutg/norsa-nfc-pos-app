@@ -1,5 +1,6 @@
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
+import {NavigationContainer} from '@react-navigation/native';
 import {PrintExpense, Home, Login, Splash, PrinterConfig} from '~/screens';
 import {stackScreenOptions} from './config';
 import {selectLoggedIn, selectSplashLodaing, useGlobalStore} from '~/state';
@@ -42,9 +43,11 @@ export function RootNavigator() {
   };
 
   return (
-    <RootStack.Navigator screenOptions={stackScreenOptions}>
-      {renderScreens()}
-    </RootStack.Navigator>
+    <NavigationContainer>
+      <RootStack.Navigator screenOptions={stackScreenOptions}>
+        {renderScreens()}
+      </RootStack.Navigator>
+    </NavigationContainer>
   );
 }
 

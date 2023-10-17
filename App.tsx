@@ -1,19 +1,10 @@
 import 'react-native-gesture-handler';
 
-import React, {FC} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {EmptyProps} from '~/types';
-import {AuthContextProvider} from '~/context/AuthContext';
-import RootNav from '~/navigation';
+import React from 'react';
+import {RootNavigator} from '~/navigation';
 
-const App: FC<EmptyProps> = () => {
-  return (
-    <AuthContextProvider>
-      <NavigationContainer>
-        <RootNav />
-      </NavigationContainer>
-    </AuthContextProvider>
-  );
-};
+function App() {
+  return <RootNavigator />;
+}
 
 export default App;

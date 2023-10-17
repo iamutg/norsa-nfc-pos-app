@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {FailureResult, PrinterConfig, SuccessResult} from '~/types';
 import {PrinterDefaultConfigObject} from '~/constants';
+import type {FailureResult, SuccessResult} from '~/types';
+import type {PrinterConfig} from './ReceiptPrinter';
 
 export type LocalStorageFailureResult = Omit<
   FailureResult<undefined, Error>,

@@ -21,8 +21,6 @@ export type PickerItem = {
   value: string;
 };
 
-export interface EmptyProps {}
-
 export type NfcTagOperationStatus = 'scanning' | 'error' | 'success' | 'none';
 
 export type NfcTagScanningReason = 'expense' | 'balance' | 'retour';
