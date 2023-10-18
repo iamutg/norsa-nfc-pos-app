@@ -1,6 +1,5 @@
-import moment from 'moment';
 import {PosPrinter, PrinterConfig} from '~/native_modules/PosPrinter';
-import {generateReceiptNumber} from '~/utils';
+import {DateUtils, generateReceiptNumber} from '~/utils';
 import {LocalStorageService} from './LocalStorageService';
 import type {Client} from '~/types';
 import {TransactionType, DailyTransaction} from './api';
@@ -27,7 +26,7 @@ export const ReceiptPrinter = {
       "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
       '[L]\n' +
       `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
-      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
+      `[C]${DateUtils.format('DD/MM/YYYY hh:mm:ss A')}\n` +
       '[L]\n' +
       '[C]================================\n' +
       '[L]\n' +
@@ -68,7 +67,7 @@ export const ReceiptPrinter = {
       "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
       '[L]\n' +
       `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
-      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
+      `[C]${DateUtils.format('DD/MM/YYYY hh:mm:ss A')}\n` +
       '[L]\n' +
       '[C]==============================\n' +
       '[L]\n' +
@@ -143,7 +142,7 @@ export const ReceiptPrinter = {
       "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
       '[L]\n' +
       `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
-      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
+      `[C]${DateUtils.format('DD/MM/YYYY hh:mm:ss A')}\n` +
       '[L]\n' +
       '[C]------------------------------\n' +
       '[L]\n' +
@@ -183,7 +182,7 @@ export const ReceiptPrinter = {
       "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
       '[L]\n' +
       `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
-      `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
+      `[C]${DateUtils.format('DD/MM/YYYY hh:mm:ss A')}\n` +
       '[L]\n' +
       '[C]==============================\n' +
       '[L]\n' +

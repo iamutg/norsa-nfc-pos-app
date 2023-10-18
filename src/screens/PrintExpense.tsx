@@ -1,6 +1,5 @@
 import React from 'react';
 import {Keyboard, StyleSheet, Text, TextInput, View} from 'react-native';
-import moment from 'moment';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -11,7 +10,7 @@ import {BottomModal} from '~/components';
 import {ApiService, Transaction, TransactionType} from '~/core/api';
 import {useModalState} from '~/hooks';
 import {Colors} from '~/styles';
-import {isValidAmount, showAlert, showToast} from '~/utils';
+import {DateUtils, isValidAmount, showAlert, showToast} from '~/utils';
 import {AddItemsScreeProps} from '~/navigation';
 import {IssuanceHistory} from '~/core/api';
 import {selectLoginData, useGlobalStore} from '~/state';
@@ -82,7 +81,7 @@ export function PrintExpense({route, navigation}: PrintExpenseProps) {
       ItemDescription: paymentType === 'expense' ? 'Expense' : 'Retour',
       Merchant_ID: loginData?.id ?? '',
       issuancehistoryId: issuanceHistoryId,
-      dateTime: moment().utc().toDate().toUTCString(),
+      dateTime: DateUtils.currentDateTimeString(),
       AmountUser: price,
       transactionType,
     };

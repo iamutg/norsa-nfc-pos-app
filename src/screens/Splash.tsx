@@ -6,7 +6,7 @@ import {Colors} from '~/styles';
 import {logo} from '~/assets/images';
 import {LoginData, useGlobalStore} from '~/state';
 import {LocalStorageService} from '~/core/LocalStorageService';
-import moment from 'moment';
+import {DateUtils} from '~/utils';
 
 export function Splash() {
   const {setSplashLoading, setLoggedIn, setLoginData} = useGlobalStore();
@@ -23,7 +23,7 @@ export function Splash() {
     if (
       loginDataRes.success &&
       loginDataRes.data &&
-      moment().isAfter(loginDataRes.data.expiryDate)
+      DateUtils.isInPast(loginDataRes.data.expiryDate ?? 0)
     ) {
       LocalStorageService.clearKey(LocalStorageService.Keys.Login);
     } else if (loginDataRes.success && loginDataRes.data) {

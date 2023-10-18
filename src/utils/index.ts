@@ -1,5 +1,5 @@
-import moment from 'moment';
 import {Alert, ToastAndroid} from 'react-native';
+import {DateUtils} from './DateUtils';
 
 const floatNumberRegex = /^(\d+(\.\d+)?)$|^(.?\d+)$/;
 const twoDecimalPlaceRegex = /^[0-9]*.?[0-9]{1,2}$/;
@@ -97,12 +97,6 @@ export const showAlertWithTwoButtons: (
   ]);
 };
 
-export const getCurrentUtcTimestamp = () => moment.utc().toISOString();
+export const generateReceiptNumber = () => DateUtils.format('DDMMYYYYHHmmss');
 
-export const getLocalTimestamp = (utcTimestamp: string) =>
-  moment
-    .utc(utcTimestamp)
-    .utcOffset(moment().utcOffset())
-    .format('YYYY-MM-DDTHH:mm:ssZ');
-
-export const generateReceiptNumber = () => moment().format('DDMMYYYYHHmmss');
+export * from './DateUtils';

@@ -9,7 +9,6 @@ import {
   View,
 } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
-import moment from 'moment';
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -40,7 +39,7 @@ import {
   NfcTagScanningReason,
   PickerItem,
 } from '~/types';
-import {getCurrentUtcTimestamp, getLocalTimestamp, showToast} from '~/utils';
+import {DateUtils, showToast} from '~/utils';
 import {selectLoginData, useGlobalStore} from '~/state';
 
 const testCardNumber = 'K-0035';
@@ -112,17 +111,8 @@ export function Home({navigation: {navigate}}: HomeProps) {
     );
     console.log('Daily report printDate: ', printDateRes);
 
-    if (printDateRes.success) {
-      const printDate = moment(printDateRes.data);
-      const currentDate = moment();
-      const time = moment('00:00:00', 'HH:mm:ss');
-
-      if (
-        currentDate.isAfter(printDate, 'day') &&
-        currentDate.isSameOrAfter(time, 'second')
-      ) {
-        await printDailyReport();
-      }
+    if (printDateRes.success && DateUtils.shouldPrintDailyReceipt()) {
+      printDailyReport();
     }
   };
 
@@ -131,14 +121,12 @@ export function Home({navigation: {navigate}}: HomeProps) {
     const dailyTranxRes = await ApiService.doGetDailyTransactions();
 
     if (dailyTranxRes.success) {
-      const currentTimestamp = getLocalTimestamp(getCurrentUtcTimestamp());
-
       if (dailyTranxRes.data?.data?.length === 0) {
         showToast('There are no transactions to be printed');
         setDailyReceiptPrintLoading(false);
         LocalStorageService.setString(
           LocalStorageService.Keys.DailyReportPrintedDate,
-          currentTimestamp.toString(),
+          DateUtils.currentDateTimeString(),
         );
         return;
       }
