@@ -3,8 +3,7 @@ import {
   parseISO,
   formatISO,
   isPast,
-  isAfter,
-  isSameDay,
+  differenceInHours,
 } from 'date-fns';
 
 export const DateUtils = {
@@ -14,14 +13,16 @@ export const DateUtils = {
   isInPast(date: Date | number) {
     return isPast(date);
   },
-  shouldPrintDailyReceipt(printedDateString?: string) {
+  shouldPrintDailyReceipt(printedDateString: string) {
     const currentDate = new Date();
     const printedDate = printedDateString
       ? parseISO(printedDateString)
       : currentDate;
 
     return (
-      isAfter(currentDate, printedDate) && !isSameDay(currentDate, printedDate)
+      differenceInHours(currentDate, printedDate, {
+        roundingMethod: 'round',
+      }) >= 24
     );
   },
   currentDateTimeString() {
