@@ -7,8 +7,9 @@ import {
 } from 'react-native-responsive-dimensions';
 import {logo} from '~/assets/images';
 import {Button, ScreenContainer} from '~/components';
+import {LocalStorageService} from '~/core/LocalStorageService';
 import {ApiService} from '~/core/api';
-import {useGlobalStore} from '~/state';
+import {LoginData, useGlobalStore} from '~/state';
 import {Colors} from '~/styles';
 import {isEmailValid, showAlert} from '~/utils';
 
@@ -55,6 +56,11 @@ export function Login() {
     setLoading(false);
 
     if (loginRes.success) {
+      loginRes.data?.data &&
+        LocalStorageService.setObject<LoginData>(
+          LocalStorageService.Keys.Login,
+          loginRes.data?.data,
+        );
       setLoginData(loginRes.data?.data);
       setLoggedIn(true);
     } else {
