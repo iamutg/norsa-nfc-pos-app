@@ -48,6 +48,12 @@ export function Header({
       noop,
       () => {
         LocalStorageService.clearKey(LocalStorageService.Keys.Login);
+        LocalStorageService.clearKey(
+          LocalStorageService.Keys.DailyReportPrintedDate,
+        );
+        LocalStorageService.clearKey(
+          LocalStorageService.Keys.PreviousPrintedReceipt,
+        );
         setLoginData(null);
         setLoggedIn(false);
       },

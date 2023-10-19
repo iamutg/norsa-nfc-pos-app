@@ -39,7 +39,7 @@ import {
   NfcTagScanningReason,
   PickerItem,
 } from '~/types';
-import {DateUtils, showToast} from '~/utils';
+import {DateUtils, isNotDefined, showToast} from '~/utils';
 import {selectLoginData, useGlobalStore} from '~/state';
 
 const testCardNumber = 'K-0035';
@@ -109,9 +109,14 @@ export function Home({navigation: {navigate}}: HomeProps) {
     const printDateRes = await LocalStorageService.getString(
       LocalStorageService.Keys.DailyReportPrintedDate,
     );
-    console.log('Daily report printDate: ', printDateRes);
 
-    if (printDateRes.success && DateUtils.shouldPrintDailyReceipt()) {
+    if (
+      printDateRes.success &&
+      printDateRes.data &&
+      DateUtils.shouldPrintDailyReceipt(printDateRes.data)
+    ) {
+      printDailyReport();
+    } else if (printDateRes.success && isNotDefined(printDateRes.data)) {
       printDailyReport();
     }
   };
@@ -140,7 +145,7 @@ export function Home({navigation: {navigate}}: HomeProps) {
       if (printRes.success) {
         LocalStorageService.setString(
           LocalStorageService.Keys.DailyReportPrintedDate,
-          currentTimestamp.toString(),
+          DateUtils.currentDateTimeString(),
         );
       } else {
         console.log('Error printing daily transactions', printRes.cause);
