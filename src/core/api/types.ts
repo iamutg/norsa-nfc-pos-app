@@ -1,7 +1,7 @@
 import {AxiosError} from 'axios';
 import {SuccessResult, FailureResult} from '~/types';
 import {HttpMethod} from './constants';
-import {LoginData} from '~/state';
+import {LoginData} from '../models';
 
 type ApiRequestConfigBase = {
   endpoint: string;
@@ -38,19 +38,6 @@ export type LoginApiResponse = GeneralApiResponse<LoginData>;
 
 export type MerchantNameApiResponse = GeneralApiResponse<{Name?: string}>;
 
-export type IssuanceHistory = {
-  id?: string;
-  Client_id?: string;
-  Pincode?: string;
-  DateTime?: string;
-  Amount?: string;
-  AmountPaid?: string;
-  Balance?: string;
-  clientCode?: string;
-  clientName?: string;
-  paybackPeriod?: number;
-};
-
 export type IssuanceHistoryApiResponse = {
   data?: {
     id?: string;
@@ -66,33 +53,6 @@ export type IssuanceHistoryApiResponse = {
     FullName?: string;
     numberOfMonths?: number;
   };
-};
-
-export enum TransactionType {
-  Expense = 1,
-  Retour = 2,
-}
-
-export type Transaction = {
-  Client_id: string;
-  Merchant_ID: string;
-  issuancehistoryId: string;
-  ItemDescription: 'Expense' | 'Retour';
-  dateTime: string;
-  AmountUser: number;
-  transactionType: TransactionType;
-};
-
-export type DailyTransaction = {
-  id?: string;
-  Client_id?: string;
-  Merchant_ID?: string;
-  ItemDescription?: string;
-  dateTime?: string;
-  AmountUser?: number;
-  issuancehistoryId?: string;
-  transactionType?: number;
-  totalPaybackPeriods?: number;
 };
 
 export type GetIssuanceHistoryApiResponse =

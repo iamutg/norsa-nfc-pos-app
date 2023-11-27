@@ -9,11 +9,11 @@ import type {
   ApiReqWithNfcCard,
   GetDailyTransactionsApiResponse,
   GetMultipleIssuanceHistoriesApiResponse,
-  IssuanceHistory,
   LoginApiResponse,
   MerchantNameApiResponse,
   Transaction,
 } from './types';
+import type {IssuanceHistory} from '../models';
 
 export const ApiService = {
   doLogin: async (email: string, password: string) => {

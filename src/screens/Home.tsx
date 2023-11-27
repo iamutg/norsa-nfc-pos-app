@@ -26,7 +26,8 @@ import {
   BalanceDialog,
 } from '~/components';
 import {SelectedAppMode} from '~/constants';
-import {ApiService, IssuanceHistory} from '~/core/api';
+import {ApiService} from '~/core/api';
+import {IssuanceHistory} from '~/core/models';
 import {LocalStorageService} from '~/core/LocalStorageService';
 import {NfcReaderWriter} from '~/core/NfcReaderWriter';
 import {ReceiptPrinter} from '~/core/ReceiptPrinter';

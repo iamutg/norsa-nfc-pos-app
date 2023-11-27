@@ -4,9 +4,10 @@ import {responsiveWidth} from 'react-native-responsive-dimensions';
 import {ScreenContainer} from '~/components';
 import {Colors} from '~/styles';
 import {logo} from '~/assets/images';
-import {LoginData, useGlobalStore} from '~/state';
+import {useGlobalStore} from '~/state';
 import {LocalStorageService} from '~/core/LocalStorageService';
 import {DateUtils} from '~/utils';
+import {LoginData} from '~/core/models';
 
 export function Splash() {
   const {setSplashLoading, setLoggedIn, setLoginData} = useGlobalStore();

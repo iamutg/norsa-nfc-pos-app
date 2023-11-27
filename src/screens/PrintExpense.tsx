@@ -7,14 +7,15 @@ import {
 } from 'react-native-responsive-dimensions';
 import {BalanceDialog, Button, Header} from '~/components';
 import {BottomModal} from '~/components';
-import {ApiService, Transaction, TransactionType} from '~/core/api';
+import {ApiService} from '~/core/api';
 import {useModalState} from '~/hooks';
 import {Colors} from '~/styles';
 import {DateUtils, isValidAmount, showAlert, showToast} from '~/utils';
 import {AddItemsScreeProps} from '~/navigation';
-import {IssuanceHistory} from '~/core/api';
+import {IssuanceHistory} from '~/core/models';
 import {selectLoginData, useGlobalStore} from '~/state';
 import {Client} from '~/types';
+import {Transaction, TransactionType} from '~/core/models';
 import {ReceiptPrinter} from '~/core/ReceiptPrinter';
 
 const merchantPinCodeModalText = 'Please Enter the Merchant Pin code';

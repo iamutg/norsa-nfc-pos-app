@@ -2,7 +2,7 @@ import {PosPrinter, PrinterConfig} from '~/native_modules/PosPrinter';
 import {DateUtils, generateReceiptNumber} from '~/utils';
 import {LocalStorageService} from './LocalStorageService';
 import type {Client} from '~/types';
-import {TransactionType, DailyTransaction} from './api';
+import type {TransactionType, DailyTransaction} from '~/core/models';
 
 export type PrintReceiptParams = {
   price: number;
