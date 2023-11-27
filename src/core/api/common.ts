@@ -42,6 +42,7 @@ axios.interceptors.request.use(req => {
 
   return req;
 });
+axios.interceptors.response.use(({data}) => data);
 
 function createRequestConfig<D>(requestConfig: ApiRequestConfig<D>) {
   const axiosReqConfig: AxiosRequestConfig = {};
@@ -110,27 +111,39 @@ export function handlerError(error: unknown): ApiFailureResult {
 
 export function doGet<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
-  return axios.get<R>(requestConfig.endpoint, config);
+  return axios.get<never, R>(requestConfig.endpoint, config);
 }
 
 export function doPost<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
-  return axios.post<R>(requestConfig.endpoint, requestConfig.data, config);
+  return axios.post<never, R>(
+    requestConfig.endpoint,
+    requestConfig.data,
+    config,
+  );
 }
 
 export function doPut<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
-  return axios.put<R>(requestConfig.endpoint, requestConfig.data, config);
+  return axios.put<never, R>(
+    requestConfig.endpoint,
+    requestConfig.data,
+    config,
+  );
 }
 
 export function doPatch<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
-  return axios.patch<R>(requestConfig.endpoint, requestConfig.data, config);
+  return axios.patch<never, R>(
+    requestConfig.endpoint,
+    requestConfig.data,
+    config,
+  );
 }
 
 export function doDelete<R, D>(requestConfig: ApiRequestConfig<D>) {
   const config = createRequestConfig(requestConfig);
-  return axios.delete<R>(requestConfig.endpoint, config);
+  return axios.delete<never, R>(requestConfig.endpoint, config);
 }
 
 async function _doApiRequest<D, R>(
@@ -138,29 +151,29 @@ async function _doApiRequest<D, R>(
   errorHandler?: CustomErrorHandler,
 ): Promise<ApiResult<R>> {
   try {
-    let response: AxiosResponse<R> | undefined;
+    let data: R;
 
     switch (requestConfig.method) {
       case HttpMethod.Get:
-        response = await doGet<R, D>(requestConfig);
+        data = await doGet<R, D>(requestConfig);
         break;
       case HttpMethod.Post:
-        response = await doPost<R, D>(requestConfig);
+        data = await doPost<R, D>(requestConfig);
         break;
       case HttpMethod.Put:
-        response = await doPut<R, D>(requestConfig);
+        data = await doPut<R, D>(requestConfig);
         break;
       case HttpMethod.Patch:
-        response = await doPatch<R, D>(requestConfig);
+        data = await doPatch<R, D>(requestConfig);
         break;
       case HttpMethod.Delete:
-        response = await doDelete<R, D>(requestConfig);
+        data = await doDelete<R, D>(requestConfig);
         break;
       default:
         throw new Error('Invalid Http Method');
     }
 
-    return createApiSuccessResult({data: response.data});
+    return createApiSuccessResult({data});
   } catch (error) {
     return errorHandler ? errorHandler(error) : handlerError(error);
   }
