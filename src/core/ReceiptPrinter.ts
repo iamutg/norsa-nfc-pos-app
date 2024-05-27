@@ -13,12 +13,16 @@ export const printText: (
 
 export const printReceipt: (
   price: number,
+  interest: number,
+  priceWithInterest: number,
   customer: Client,
   merchantName: string,
   paymentType: TransactionType,
   paybackPeriod: number,
 ) => Promise<void> = async (
   price,
+  interest: number,
+  priceWithInterest: number,
   customer,
   merchantName,
   paymentType,
@@ -35,6 +39,10 @@ export const printReceipt: (
     `[L]${
       paymentType === TransactionType.expense ? 'Sale' : 'Retour'
     } Amount :[R]NAFL ${price.toFixed(2)}\n` +
+    '[L]\n' +
+    `[L]Interest ${interest}%` +
+    '[L]\n' +
+    `[L]After Interest Amount :[R]NAFL ${priceWithInterest}\n` +
     '[L]\n' +
     '[C]==============================\n' +
     '[L]\n' +
