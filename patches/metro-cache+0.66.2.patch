@@ -1,0 +1,44 @@
+diff --git a/node_modules/metro-cache/src/stableHash.js b/node_modules/metro-cache/src/stableHash.js
+index 3a3ebc1..ee99348 100644
+--- a/node_modules/metro-cache/src/stableHash.js
++++ b/node_modules/metro-cache/src/stableHash.js
+@@ -7,21 +7,21 @@
+  *
+  * @format
+  */
+-"use strict";
++'use strict';
+ 
+-const canonicalize = require("metro-core/src/canonicalize");
++const canonicalize = require('metro-core/src/canonicalize');
+ 
+-const crypto = require("crypto");
++const crypto = require('crypto');
+ 
+ function stableHash(value) {
+   return (
+     crypto
+-      .createHash("md4")
++      .createHash('md5')
+       /* $FlowFixMe(>=0.95.0 site=react_native_fb) This comment suppresses an
+        * error found when Flow v0.95 was deployed. To see the error, delete this
+        * comment and run Flow. */
+       .update(JSON.stringify(value, canonicalize))
+-      .digest("buffer")
++      .digest('buffer')
+   );
+ }
+ 
+diff --git a/node_modules/metro-cache/src/stableHash.js.flow b/node_modules/metro-cache/src/stableHash.js.flow
+index f3ceb66..2dcfde7 100644
+--- a/node_modules/metro-cache/src/stableHash.js.flow
++++ b/node_modules/metro-cache/src/stableHash.js.flow
+@@ -16,7 +16,7 @@ const crypto = require('crypto');
+ function stableHash(value: mixed): Buffer {
+   return (
+     crypto
+-      .createHash('md4')
++      .createHash('md5')
+       /* $FlowFixMe(>=0.95.0 site=react_native_fb) This comment suppresses an
+        * error found when Flow v0.95 was deployed. To see the error, delete this
+        * comment and run Flow. */

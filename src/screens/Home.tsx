@@ -16,7 +16,7 @@ import {
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
 import Dialog from 'react-native-dialog';
-import {logo} from '~/assets/images';
+import {logo, logoPrepaid} from '~/assets/images';
 import {
   Button,
   Header,
@@ -465,7 +465,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <Header title="Home" hasLogoutButton hasSettingsButton />
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
-          <Image source={logo} style={styles.logo} />
+          <Image source={logoPrepaid} style={styles.logo} />
           {renderButtons()}
           <Button
             title="Show Balance"
@@ -584,8 +584,8 @@ const styles = StyleSheet.create({
     padding: responsiveWidth(2),
   },
   logo: {
-    height: responsiveWidth(40),
-    width: responsiveWidth(40),
+    height: responsiveWidth(50),
+    width: responsiveWidth(50),
   },
   scanNfcBtn: {
     marginTop: responsiveHeight(4),
