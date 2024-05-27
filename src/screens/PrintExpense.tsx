@@ -6,11 +6,12 @@ import {
   responsiveHeight,
   responsiveWidth,
 } from 'react-native-responsive-dimensions';
-import {BalanceDialog, Button, Header} from '~/components';
+import {BalanceDialog, Button, Header, Loader} from '~/components';
 import BottomModal from '~/components/BottomModal';
 import {useAuthContext} from '~/context/AuthContext';
 import {
   doCreateTrasactionHistory,
+  doGetMerchantInterest,
   doGetMultipleIssuanceHistories,
 } from '~/core/ApiService';
 import {printReceipt} from '~/core/ReceiptPrinter';
@@ -33,6 +34,7 @@ export interface Props extends AddItemsScreeProps {}
 const PrintExpense: FC<Props> = ({route, navigation}) => {
   const {loginData} = useAuthContext();
 
+  const [merchantInterest, setMerchantInterest] = React.useState(0);
   const [expensePrice, setExpensePrice] = useState('');
   const [pinCode, setPinCode] = useState('');
   const [hasPrintedForMerchant, setHasPrintedForMerchant] = useState(false);
@@ -46,6 +48,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     useModalState();
 
   const [loading, setLoading] = useState(false);
+  const [fetchLoading, setFetchLoading] = React.useState(false);
   const [isConfirmationModalShown, setIsConfirmationModalShown] =
     useState(false);
 
@@ -58,6 +61,30 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
   const paybackPeriod = route.params?.paybackPeriod;
   const paymentType = route.params?.paymentType;
   const cardId = route.params?.cardId ?? '';
+
+  React.useEffect(() => {
+    const fetchMerchantInterest = async () => {
+      setFetchLoading(true);
+      const merchantInterestApiRes = await doGetMerchantInterest(
+        paybackPeriod ?? 0,
+      );
+      setFetchLoading(false);
+      setMerchantInterest(
+        merchantInterestApiRes?.data?.merchantInterest?.Interest ?? 0,
+      );
+    };
+    fetchMerchantInterest();
+  }, []);
+
+  const calculateExpensePreiceWithInterest = () => {
+    const _expensePrice = parseFloat(expensePrice);
+
+    return isValidAmount(expensePrice)
+      ? parseFloat(
+          (_expensePrice + _expensePrice * (merchantInterest / 100)).toFixed(2),
+        )
+      : 0;
+  };
 
   const getModalText = useCallback(() => {
     if (paymentType === 'retour' && !hasMerchantPincodeVerified) {
@@ -112,6 +139,8 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
     if (res.success) {
       await printReceipt(
         price,
+        merchantInterest,
+        calculateExpensePreiceWithInterest(),
         client,
         loginData?.name,
         paymentType === 'expense'
@@ -141,6 +170,8 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
         try {
           await printReceipt(
             price,
+            merchantInterest,
+            calculateExpensePreiceWithInterest(),
             client,
             loginData?.name,
             paymentType === 'expense'
@@ -255,6 +286,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
   return (
     <>
       <View style={styles.f1}>
+        <Loader visible={fetchLoading} />
         <Header title="Add Items" hasBackButton />
         <View style={[styles.f1, styles.container]}>
           <View>
@@ -281,6 +313,30 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
               <View style={styles.clientInfoRightColumn}>
                 <Text style={styles.clientInfoValueText}>
                   {paybackPeriod} (month(s))
+                </Text>
+              </View>
+            </View>
+            <View style={[styles.clientInfoWrapper, styles.clientInfoDivider]}>
+              <View style={styles.clientInfoLeftColumn}>
+                <Text style={styles.clientInfoLabelText}>
+                  Merchant Interest
+                </Text>
+              </View>
+              <View style={styles.clientInfoRightColumn}>
+                <Text style={styles.clientInfoValueText}>
+                  {merchantInterest}%
+                </Text>
+              </View>
+            </View>
+            <View style={[styles.clientInfoWrapper, styles.clientInfoDivider]}>
+              <View style={styles.clientInfoLeftColumn}>
+                <Text style={styles.clientInfoLabelText}>
+                  Amount with interest
+                </Text>
+              </View>
+              <View style={styles.clientInfoRightColumn}>
+                <Text style={styles.clientInfoValueText}>
+                  {calculateExpensePreiceWithInterest()}
                 </Text>
               </View>
             </View>

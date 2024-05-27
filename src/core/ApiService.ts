@@ -1,5 +1,5 @@
 import Axios, {AxiosError, AxiosInstance, AxiosResponse} from 'axios';
-import {authEndpoints, BASE_URL, mainEndpoints} from '~/constants';
+import authEndpoints, {BASE_URL, mainEndpoints} from '~/constants';
 import {
   CreateTransactionHistoryApiResponse,
   CreateTransactionHistoryResponse,
@@ -15,6 +15,7 @@ import {
   GetIssuanceHistoryResponse,
   GetMerchantIdApiResponse,
   GetMerchantIdResponse,
+  GetMerchantInterestResponse,
   GetMultipleIssuanceHistoriesApiResponse,
   GetMultipleIssuanceHistoriesResponse,
   IssuanceHistory,
@@ -244,6 +245,29 @@ export const doGetMerchantId: (
     }
   } catch (error) {
     console.log('Error getting merchant id', error);
+
+    return {
+      message: 'Something went wrong',
+    };
+  }
+};
+
+export const doGetMerchantInterest: (
+  numberOfMonths: number,
+) => Promise<GetMerchantInterestResponse> = async numberOfMonths => {
+  try {
+    const axios = await getAxiosInstanceWithAuthHeader();
+
+    const response = await axios.get<
+      GetMerchantInterestResponse,
+      AxiosResponse<GetMerchantInterestResponse>
+    >(mainEndpoints.getMerchantInterest(numberOfMonths));
+
+    return {
+      data: response.data,
+    };
+  } catch (error) {
+    console.log('Error Getting Client: ', error);
 
     return {
       message: 'Something went wrong',

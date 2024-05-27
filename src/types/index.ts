@@ -221,6 +221,18 @@ export type GetMerchantIdSuccessResponse = {
 export type GetMerchantIdResponse = GetMerchantIdSuccessResponse &
   GeneralFailureResponse;
 
+export type GetMerchantInterestResponse = {
+  data?: {
+    message?: string;
+    merchantInterest?: {
+      id?: string;
+      NumberOfMonths?: number;
+      Interest?: number;
+      MerchantId?: string;
+    };
+  };
+} & GeneralFailureResponse;
+
 export type DailyTransaction = {
   id?: string;
   Client_id?: string;

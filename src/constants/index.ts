@@ -3,10 +3,10 @@ import {AppMode} from '~/types';
 const DEV_BASE_URL = 'https://norsa-backend-demo.herokuapp.com/api/';
 const PROD_BASE_URL = 'https://norsabackend.herokuapp.com/api/';
 
-export const BASE_URL = __DEV__ ? DEV_BASE_URL : PROD_BASE_URL;
+export const BASE_URL = false ? DEV_BASE_URL : PROD_BASE_URL;
 // export const BASE_URL = PROD_BASE_URL;
 
-export const authEndpoints = {
+export default {
   login: 'auth/login',
 };
 
@@ -17,6 +17,8 @@ export const mainEndpoints = {
   createTransactionHistory: 'transactionHistory/createTransactionHistory',
   getMerchantId: (userId: string) =>
     `auth/getMerchantIdForLoggedInUser/${userId}`,
+  getMerchantInterest: (numberOfMonths: number) =>
+    `merchants/getMerchantInterest/${numberOfMonths}`,
   getDailyTransactions: 'transactionHistory/getMerchantsTodaysTransactions',
   getMerchantName: 'merchants/getMerchantNameByUserId',
   getDailySalesPrintCheck: (merchantId: string) =>
