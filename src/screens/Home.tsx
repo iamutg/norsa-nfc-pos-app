@@ -473,6 +473,12 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             onPress={onScanNfcForBalance}
           />
           <Button
+            loading={printPreviousReceiptLoading}
+            title="Print previous receipt"
+            style={styles.scanNfcBtn}
+            onPress={onPrintPreviousPrintedReceipt}
+          />
+          <Button
             loading={dailyReceiptPrintLoading}
             title="Print Daily Receipt"
             style={styles.scanNfcBtn}
