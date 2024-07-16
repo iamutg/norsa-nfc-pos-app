@@ -25,7 +25,7 @@ export const printReceipt: (
   paybackPeriod,
 ) => {
   const textToBePrinted =
-    "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
+    "[C]<u><font size='big'>Merpol</font></u>\n" +
     '[L]\n' +
     `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
@@ -96,7 +96,7 @@ export const printDailyReceipt: (
     .toFixed(2);
 
   const textToBePrinted =
-    "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
+    "[C]<u><font size='big'>Merpol</font></u>\n" +
     '[L]\n' +
     `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
@@ -144,7 +144,7 @@ export const printBalance: (
   paybackPeriod,
 ) => {
   const textToBePrinted =
-    "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
+    "[C]<u><font size='big'>Merpol</font></u>\n" +
     '[L]\n' +
     `[C]Receipt N.O: ${generateReceiptNumber()}\n` +
     `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
