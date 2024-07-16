@@ -73,7 +73,7 @@ const PrinterConfig: FC<Props> = ({}) => {
     }
 
     const textToPrinted =
-      "[C]<u><font size='big'>Norsa N.V.</font></u>\n" +
+      "[C]<u><font size='big'>Merpol</font></u>\n" +
       '[L]\n' +
       `[C]Receipt N.O: ${(Math.random() * 1000).toFixed(0)}\n` +
       `[C]${moment().format('DD/MM/YYYY hh:mm:ss A')}\n` +
