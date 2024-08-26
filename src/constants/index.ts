@@ -1,7 +1,7 @@
 import {AppMode} from '~/types';
 
-const DEV_BASE_URL = 'https://api.merpol.org/';
-const PROD_BASE_URL = 'https://api.merpol.org/';
+const DEV_BASE_URL = 'https://api.merpol.org/api/';
+const PROD_BASE_URL = 'https://api.merpol.org/api/';
 
 export const BASE_URL = __DEV__ ? DEV_BASE_URL : PROD_BASE_URL;
 
