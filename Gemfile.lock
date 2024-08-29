@@ -233,6 +233,7 @@ GEM
       xcpretty (~> 0.2, >= 0.0.7)
 
 PLATFORMS
+  arm64-darwin-23
   x86_64-darwin-21
 
 DEPENDENCIES
@@ -244,4 +245,4 @@ RUBY VERSION
    ruby 3.1.2p20
 
 BUNDLED WITH
-   2.4.13
+   2.5.11
