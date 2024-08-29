@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "start": "react-native start",
     "fastlane": "bundle exec fastlane",
-    "build:android_release_apk": "yarn fastlane android release_apk",
+    "build:android_release_apk": "NODE_OPTIONS=--openssl-legacy-provider yarn fastlane android release_apk",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
