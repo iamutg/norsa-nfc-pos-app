@@ -97,23 +97,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
         await initNfcManager();
         console.log('Nfc Manager Init');
 
-        const _printDate = await getDailyReportPrintedDate();
-        console.log('Daily report printDate: ', _printDate);
+        // const _printDate = await getDailyReportPrintedDate();
+        // console.log('Daily report printDate: ', _printDate);
 
-        if (_printDate === null) {
-          await printDailyReport();
-        } else {
-          const printDate = moment(_printDate);
-          const currentDate = moment();
-          const time = moment('00:00:00', 'HH:mm:ss');
+        // if (_printDate === null) {
+        //   await printDailyReport();
+        // } else {
+        //   const printDate = moment(_printDate);
+        //   const currentDate = moment();
+        //   const time = moment('00:00:00', 'HH:mm:ss');
 
-          if (
-            currentDate.isAfter(printDate, 'day') &&
-            currentDate.isSameOrAfter(time, 'second')
-          ) {
-            await printDailyReport();
-          }
-        }
+        //   if (
+        //     currentDate.isAfter(printDate, 'day') &&
+        //     currentDate.isSameOrAfter(time, 'second')
+        //   ) {
+        //     await printDailyReport();
+        //   }
+        // }
       } catch (error) {
         console.log('Error Initializing Nfc Manager');
       }
