@@ -99,7 +99,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     initNfcManager().catch(error =>
       console.log('Error initializing nfc manager', error),
     );
-    shouldPrintDailyReceipt();
+    // shouldPrintDailyReceipt();
   }, []);
 
   useEffect(() => {
