@@ -34,3 +34,5 @@ export const asyncStorageKeys = {
 };
 
 export const appModes: AppMode = 'expense';
+
+export const CustomerServiceContactNumber = '+5999 767-1591';

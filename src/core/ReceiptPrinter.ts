@@ -3,6 +3,7 @@ import {print} from '~/native_modules/PosPrinter';
 import {Client, DailyTransaction, TransactionType} from '~/types';
 import {generateReceiptNumber} from '~/utils';
 import {setPreviousPrintedReceipt} from './LocalStorageService';
+import {CustomerServiceContactNumber} from '~/constants';
 
 export const printText: (
   textToBePrinted: string | null,
@@ -54,7 +55,7 @@ export const printReceipt: (
     `[L]\n` +
     `[L]Thank you for your purchase\n` +
     `[L]For questions or inquiries call customer service:\n` +
-    '[L]+5999 767-1563\n' +
+    `[L]${CustomerServiceContactNumber}\n` +
     `[C]------------------------------\n` +
     `[C]<b>No Cash Refunds</b>`;
 
@@ -123,7 +124,7 @@ export const printDailyReceipt: (
     `[L]\n` +
     `[L]Thank you for your purchase\n` +
     `[L]For questions or inquiries call customer service:\n` +
-    '[L]+5999 767-1563';
+    `[L]${CustomerServiceContactNumber}`;
 
   console.log(textToBePrinted);
 
@@ -172,7 +173,7 @@ export const printBalance: (
     `[L]\n` +
     `[L]Thank you for your purchase\n` +
     `[L]For questions or inquiries call customer service:\n` +
-    '[L]+5999 767-1563';
+    `[L]${CustomerServiceContactNumber}`;
 
   console.log(textToBePrinted);
 
