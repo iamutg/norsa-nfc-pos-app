@@ -18,6 +18,7 @@ import {
 } from '~/core/LocalStorageService';
 import {PrinterConfig as TPrinterConfig} from '~/types';
 import {showToast} from './../utils/index';
+import {CustomerServiceContactNumber} from '~/constants';
 
 export interface Props {}
 
@@ -97,7 +98,7 @@ const PrinterConfig: FC<Props> = ({}) => {
       `[L]--------------------------------\n` +
       `[L]\n` +
       `[L]Thank you for your purchase\n` +
-      `[L]For questions or inquiries call customer service : +5999 767-1563`;
+      `[L]For questions or inquiries call customer service : ${CustomerServiceContactNumber}`;
 
     try {
       const dpi = parseFloat(_dpi);
