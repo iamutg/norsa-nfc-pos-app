@@ -417,12 +417,14 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Button
             title="Expense"
             style={styles.scanNfcBtn}
+            textStyle={styles.buttonText}
             loading={loading}
             onPress={onScanNfcPressed}
           />
           <Button
             title="Retour"
             style={styles.scanNfcBtn}
+            textStyle={styles.buttonText}
             onPress={openRetourDialog}
           />
         </>
@@ -433,6 +435,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Button
             title="Expense"
             style={styles.scanNfcBtn}
+            textStyle={styles.buttonText}
             loading={loading}
             onPress={onScanNfcPressed}
           />
@@ -444,6 +447,7 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
           <Button
             title="Retour"
             style={styles.scanNfcBtn}
+            textStyle={styles.buttonText}
             onPress={onScanNfcForRetourPressed}
           />
         </>
@@ -470,29 +474,35 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
       <View style={styles.f1}>
         <View style={styles.contentContainer}>
           <Image source={logo} style={styles.logo} />
-          <Button
-            title="Change Kassa"
-            style={styles.scanNfcBtn}
-            onPress={gotoSelectMerchantIdScreen}
-          />
-          {renderButtons()}
-          <Button
-            loading={printPreviousReceiptLoading}
-            title="Print Previous Receipt"
-            style={styles.scanNfcBtn}
-            onPress={onPrintPreviousPrintedReceipt}
-          />
-          <Button
-            title="Show Balance"
-            style={styles.scanNfcBtn}
-            onPress={onScanNfcForBalance}
-          />
-          <Button
-            loading={dailyReceiptPrintLoading}
-            title="Print Daily Receipt"
-            style={styles.scanNfcBtn}
-            onPress={onPrintDailyReceiptPressed}
-          />
+          <View style={styles.buttonsContainer}>
+            <Button
+              title="Change Kassa"
+              style={styles.scanNfcBtn}
+              textStyle={styles.buttonText}
+              onPress={gotoSelectMerchantIdScreen}
+            />
+            {renderButtons()}
+            <Button
+              loading={printPreviousReceiptLoading}
+              title="Print Previous Receipt"
+              style={styles.scanNfcBtn}
+              textStyle={styles.buttonText}
+              onPress={onPrintPreviousPrintedReceipt}
+            />
+            <Button
+              title="Show Balance"
+              style={styles.scanNfcBtn}
+              textStyle={styles.buttonText}
+              onPress={onScanNfcForBalance}
+            />
+            <Button
+              loading={dailyReceiptPrintLoading}
+              title="Print Daily Receipt"
+              style={styles.scanNfcBtn}
+              textStyle={styles.buttonText}
+              onPress={onPrintDailyReceiptPressed}
+            />
+          </View>
         </View>
       </View>
       <BottomModal visible={bottomModalShown}>
@@ -575,6 +585,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '80%',
   },
+  buttonsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
   nfcIconWrapper: {
     borderWidth: responsiveWidth(0.3),
     borderColor: Colors.primary,
@@ -582,12 +598,16 @@ const styles = StyleSheet.create({
     padding: responsiveWidth(2),
   },
   logo: {
-    height: responsiveWidth(40),
-    width: responsiveWidth(40),
+    height: responsiveWidth(35),
+    width: responsiveWidth(35),
+    resizeMode: 'cover',
   },
   scanNfcBtn: {
-    marginTop: responsiveHeight(4),
-    width: '80%',
+    marginTop: responsiveHeight(2),
+    width: `${100 / 2 - 5}%`,
+  },
+  buttonText: {
+    textAlign: 'center',
   },
   modalContainer: {
     alignSelf: 'center',
