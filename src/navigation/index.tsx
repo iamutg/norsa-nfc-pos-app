@@ -1,7 +1,14 @@
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import {useAuthContext} from '~/context/AuthContext';
-import {PrintExpense, Home, Login, Splash, PrinterConfig} from '~/screens';
+import {
+  PrintExpense,
+  Home,
+  Login,
+  Splash,
+  PrinterConfig,
+  TestPrintPage,
+} from '~/screens';
 import {RootStackParamList} from '~/types';
 import {stackScreenOptions} from './config';
 import {routeNames} from './routeNames';
@@ -38,6 +45,10 @@ const RootNav = () => {
           <RootStack.Screen
             name={routeNames.PrinterConfig}
             component={PrinterConfig}
+          />
+          <RootStack.Screen
+            name={routeNames.TestPrintPage}
+            component={TestPrintPage}
           />
         </>
       );
