@@ -1,26 +1,27 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
-  Platform,
   StyleSheet,
   Text,
   View,
-  Button,
   ScrollView,
-  DeviceEventEmitter,
   NativeEventEmitter,
   Switch,
   TouchableOpacity,
   Dimensions,
-  ToastAndroid,
+  Alert,
 } from 'react-native';
 import {
   BluetoothManager,
   BluetoothEscposPrinter,
   BluetoothTscPrinter,
+  ALIGN,
 } from 'tp-react-native-bluetooth-printer';
 import PrintButton from './PrintButton';
 import AsyncStorage from '@react-native-community/async-storage';
+import {checkPrinterConnected} from '../BluetoothThermalPrinter';
+import {base64Image, logoBase64} from '~/assets/images/logoBase64';
+import {Button} from '~/components';
 
 const {height, width} = Dimensions.get('window');
 
@@ -42,22 +43,24 @@ const PrintReceipt = () => {
 
     checkBluetoothEnabled();
 
-    const bluetoothManagerEmitter = new NativeEventEmitter(BluetoothManager);
+    const bluetoothManagerEmitter = new NativeEventEmitter(
+      BluetoothManager as any,
+    );
     _listeners.push(
       bluetoothManagerEmitter.addListener(
-        BluetoothManager.EVENT_DEVICE_ALREADY_PAIRED,
+        (BluetoothManager as any).EVENT_DEVICE_ALREADY_PAIRED,
         _deviceAlreadPaired,
       ),
     );
     _listeners.push(
       bluetoothManagerEmitter.addListener(
-        BluetoothManager.EVENT_DEVICE_FOUND,
+        (BluetoothManager as any).EVENT_DEVICE_FOUND,
         _deviceFoundEvent,
       ),
     );
     _listeners.push(
       bluetoothManagerEmitter.addListener(
-        BluetoothManager.EVENT_CONNECTION_LOST,
+        (BluetoothManager as any).EVENT_CONNECTION_LOST,
         () => {
           setName('');
           setBoundAddress('');
@@ -69,6 +72,55 @@ const PrintReceipt = () => {
       _listeners.forEach(listener => listener.remove());
     };
   }, []);
+
+  const _testPrint = async () => {
+    checkPrinterConnected().then(async isConnected => {
+      if (isConnected) {
+        try {
+          await BluetoothEscposPrinter.printerInit();
+          await BluetoothEscposPrinter.printerAlign(ALIGN.CENTER);
+          await BluetoothEscposPrinter.printText('Merpol\n\r', {});
+          await BluetoothEscposPrinter.printText('Hello World\n\r', {});
+        } catch (error) {
+          Alert.alert('Error', error.message ?? 'Failed to print');
+        }
+      }
+    });
+  };
+
+  const _printLogo = async () => {
+    checkPrinterConnected().then(async isConnected => {
+      if (isConnected) {
+        try {
+          await BluetoothEscposPrinter.printerInit();
+          await BluetoothEscposPrinter.printerAlign(ALIGN.CENTER);
+          await BluetoothEscposPrinter.printPic(base64Image, {
+            width: 200,
+            left: 40,
+          });
+        } catch (error) {
+          Alert.alert('Error', error.message ?? 'Failed to print');
+        }
+      }
+    });
+  };
+
+  const _printLogoMerpol = async () => {
+    checkPrinterConnected().then(async isConnected => {
+      if (isConnected) {
+        try {
+          await BluetoothEscposPrinter.printerInit();
+          await BluetoothEscposPrinter.printerAlign(ALIGN.CENTER);
+          await BluetoothEscposPrinter.printPic(logoBase64, {
+            width: 200,
+            left: 40,
+          });
+        } catch (error) {
+          Alert.alert('Error', error.message ?? 'Failed to print');
+        }
+      }
+    });
+  };
 
   useEffect(() => {
     const getData = async () => {
@@ -128,7 +180,7 @@ const PrintReceipt = () => {
         style={styles.wtf}
         onPress={() => {
           setLoading(true);
-          BluetoothManager.connect(row.address)
+          (BluetoothManager.connect(row.address) as any)
             .then(() => {
               setLoading(false);
               setBoundAddress(row.address);
@@ -151,7 +203,7 @@ const PrintReceipt = () => {
 
   const _scan = () => {
     setLoading(true);
-    BluetoothManager.scanDevices()
+    (BluetoothManager.scanDevices() as any)
       .then(s => {
         let found = JSON.parse(s.found || '[]');
         setFoundDs(found);
@@ -176,7 +228,7 @@ const PrintReceipt = () => {
             onValueChange={v => {
               setLoading(true);
               if (!v) {
-                BluetoothManager.disableBluetooth()
+                (BluetoothManager.disableBluetooth() as any)
                   .then(() => {
                     setBleOpend(false);
                     setLoading(false);
@@ -187,7 +239,7 @@ const PrintReceipt = () => {
                     // alert(err);
                   });
               } else {
-                BluetoothManager.enableBluetooth()
+                (BluetoothManager.enableBluetooth() as any)
                   .then(r => {
                     let paired = r
                       ? r.map(item => JSON.parse(item)).filter(Boolean)
@@ -204,6 +256,7 @@ const PrintReceipt = () => {
             }}
           />
           <Button
+            style={{marginVertical: 10}}
             disabled={loading || !bleOpend}
             onPress={_scan}
             title="Scan"
@@ -225,13 +278,26 @@ const PrintReceipt = () => {
         </View>
         <View
           style={{
-            flexDirection: 'row',
-            justifyContent: 'space-around',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
             paddingVertical: 30,
           }}>
-          <PrintButton
-            disabled={loading || !(bleOpend && boundAddress.length > 0)}
-            title="Test Print Receipt"
+          <Button
+            style={{marginTop: 10}}
+            title="Print Test Logo"
+            onPress={_printLogo}
+          />
+          <Button
+            style={{marginTop: 10}}
+            title="Print  Merpol Logo"
+            onPress={_printLogoMerpol}
+          />
+          <PrintButton title="Test Bold Styles" />
+          <Button
+            style={{marginTop: 10}}
+            title="Test Print"
+            onPress={_testPrint}
           />
         </View>
       </ScrollView>

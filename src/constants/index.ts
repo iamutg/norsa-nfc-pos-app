@@ -1,3 +1,4 @@
+import {logo} from '~/assets/images';
 import {AppMode} from '~/types';
 
 const DEV_BASE_URL = 'https://api.merpol.org/api/';

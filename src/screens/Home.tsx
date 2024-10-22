@@ -601,7 +601,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(40),
   },
   scanNfcBtn: {
-    marginTop: responsiveHeight(4),
+    marginTop: responsiveHeight(2),
     width: '80%',
   },
   modalContainer: {
