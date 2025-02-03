@@ -12,6 +12,8 @@ target 'PosPrinter' do
     :hermes_enabled => false
   )
 
+  pod 'RNBluetoothEscposPrinter', :path => '../node_modules/tp-react-native-bluetooth-printer'
+
   target 'PosPrinterTests' do
     inherit! :complete
     # Pods for testing

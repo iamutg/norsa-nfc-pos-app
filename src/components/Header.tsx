@@ -55,7 +55,7 @@ const Header: FC<Props> = ({
   }, []);
 
   const onSettingsIconPressed = useCallback(() => {
-    navigation.navigate(routeNames.PrinterConfig);
+    navigation.navigate(routeNames.TestPrintPage);
   }, []);
 
   return (

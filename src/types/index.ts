@@ -308,6 +308,7 @@ export type MainStackParamList = {
     issuanceHistoryId: string;
     paymentType: NfcTagScanningReason;
   };
+  [routeNames.TestPrintPage]: undefined;
 };
 
 export type RootStackParamList = SplashStackParamList &

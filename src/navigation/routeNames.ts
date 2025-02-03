@@ -4,4 +4,5 @@ export enum routeNames {
   Home = 'Home',
   PrinterConfig = 'PrinterConfig',
   PrintExpense = 'PrintExpense',
+  TestPrintPage = 'TestPrintPage',
 }

@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -406,6 +407,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
   }, [scanningStatus]);
 
+  const [printerLoading, setPrinterLoading] = React.useState(true);
+
+  const renderModalPrinterContent = useCallback(() => {
+    if (printerLoading) {
+      setTimeout(() => {
+        setPrinterLoading(false);
+        navigate(routeNames.TestPrintPage);
+      }, 1000);
+    }
+    return (
+      <View style={styles.nfcContentContainer}>
+        <ActivityIndicator animating color={Colors.primary} size="large" />
+        <Text style={styles.scanningNfcText}>Initializing Printer</Text>
+      </View>
+    );
+  }, [printerLoading]);
+
   const renderButtons = useCallback(() => {
     if (appModes === 'expense-retour') {
       return (
@@ -461,115 +479,135 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
   );
 
   return (
-    <ScreenContainer>
-      <Header title="Home" hasLogoutButton hasSettingsButton />
-      <View style={styles.f1}>
-        <View style={styles.contentContainer}>
-          <Image source={logo} style={styles.logo} />
-          {renderButtons()}
-          <Button
-            title="Show Balance"
-            style={styles.scanNfcBtn}
-            onPress={onScanNfcForBalance}
-          />
-          <Button
-            loading={printPreviousReceiptLoading}
-            title="Print previous receipt"
-            style={styles.scanNfcBtn}
-            onPress={onPrintPreviousPrintedReceipt}
-          />
-          <Button
-            loading={dailyReceiptPrintLoading}
-            title="Print Daily Receipt"
-            style={styles.scanNfcBtn}
-            onPress={onPrintDailyReceiptPressed}
-          />
-        </View>
-      </View>
-      <BottomModal visible={bottomModalShown}>
-        <View style={styles.modalContainer}>
-          <TouchableOpacity
-            style={styles.closeBottomModalBtn}
-            onPress={hideBottomModal}>
-            <Icons.MaterialIcons
-              name="close"
-              color={Colors.black}
-              size={responsiveFontSize(4)}
+    <ScrollView
+      style={{
+        backgroundColor: Colors.white,
+        flex: 1,
+      }}>
+      <ScreenContainer>
+        <Header title="Home" hasLogoutButton hasSettingsButton />
+        <View style={styles.f1}>
+          <View style={styles.contentContainer}>
+            <Image source={logo} style={styles.logo} />
+            {renderButtons()}
+            <Button
+              title="Show Balance"
+              style={styles.scanNfcBtn}
+              onPress={onScanNfcForBalance}
             />
-          </TouchableOpacity>
-          {renderModalContent()}
-        </View>
-      </BottomModal>
-      <BottomModal visible={selectPaybackPeriodModalShown}>
-        <View
-          style={[
-            styles.modalContainer,
-            styles.selectPaybackPeriodModalContainer,
-          ]}>
-          <TouchableOpacity
-            style={styles.closeBottomModalBtn}
-            onPress={hideSelectPaybackPeriodModal}>
-            <Icons.MaterialIcons
-              name="close"
-              color={Colors.black}
-              size={responsiveFontSize(4)}
+            <Button
+              loading={printPreviousReceiptLoading}
+              title="Print previous receipt"
+              style={styles.scanNfcBtn}
+              onPress={onPrintPreviousPrintedReceipt}
             />
-          </TouchableOpacity>
-          <Text style={styles.selectPaybackPeriodLabelText}>
-            Please select a payback period
-          </Text>
-          <Picker
-            style={styles.paybackPeriodPicker}
-            mode="dropdown"
-            selectedValue={selectedPaybackPeriod}
-            onValueChange={onPaybackPeriodSelected}>
-            <Picker.Item
-              label="Select Payback Period"
-              value="none"
-              color={Colors.gray}
+            <Button
+              loading={dailyReceiptPrintLoading}
+              title="Print Daily Receipt"
+              style={styles.scanNfcBtn}
+              onPress={onPrintDailyReceiptPressed}
             />
-            {renderPaybackPeriodItems()}
-          </Picker>
-          <Button
-            title="Next"
-            style={styles.selectPaybackPeriodModalNextBtn}
-            onPress={onSelectPaybackPeriodNextButtonPressed}
-          />
+          </View>
         </View>
-      </BottomModal>
-      <Loader visible={loaderLoading} />
-      <Dialog.Container visible={isRetourDialogShown}>
-        <Dialog.Title>
-          <Text style={styles.retourDialogTitleText}>Retour</Text>
-        </Dialog.Title>
-        <Dialog.Description style={styles.retourDialogText}>
-          This is meant for refund only,do not use for normal transactions.
-        </Dialog.Description>
-        <Dialog.Button
-          label="Cancel"
-          color={Colors.red}
-          onPress={closeRetourDialog}
-        />
-        <Dialog.Button label="Continue" onPress={onContinuePressed} />
-      </Dialog.Container>
-      <BalanceDialog
-        visible={balanceDialogShown}
-        description={
-          <Text>
-            {selectedIssuanceHistory?.clientName} Your balance for card number{' '}
-            {cardNumber} is :{' '}
-            <Text style={styles.balanceText}>
-              NAFL{' '}
-              {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
+        <BottomModal visible={printerLoading}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeBottomModalBtn}
+              onPress={hideBottomModal}>
+              <Icons.MaterialIcons
+                name="close"
+                color={Colors.black}
+                size={responsiveFontSize(4)}
+              />
+            </TouchableOpacity>
+            {renderModalPrinterContent()}
+          </View>
+        </BottomModal>
+        <BottomModal visible={bottomModalShown}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeBottomModalBtn}
+              onPress={hideBottomModal}>
+              <Icons.MaterialIcons
+                name="close"
+                color={Colors.black}
+                size={responsiveFontSize(4)}
+              />
+            </TouchableOpacity>
+            {renderModalContent()}
+          </View>
+        </BottomModal>
+        <BottomModal visible={selectPaybackPeriodModalShown}>
+          <View
+            style={[
+              styles.modalContainer,
+              styles.selectPaybackPeriodModalContainer,
+            ]}>
+            <TouchableOpacity
+              style={styles.closeBottomModalBtn}
+              onPress={hideSelectPaybackPeriodModal}>
+              <Icons.MaterialIcons
+                name="close"
+                color={Colors.black}
+                size={responsiveFontSize(4)}
+              />
+            </TouchableOpacity>
+            <Text style={styles.selectPaybackPeriodLabelText}>
+              Please select a payback period
             </Text>
-          </Text>
-        }
-        negativeButtonText="PRINT"
-        posititveButtonText="OK"
-        closeDialog={hideBalanceDialog}
-        onNegativeButtonPress={onPrintBalancePressed}
-      />
-    </ScreenContainer>
+            <Picker
+              style={styles.paybackPeriodPicker}
+              mode="dropdown"
+              selectedValue={selectedPaybackPeriod}
+              onValueChange={onPaybackPeriodSelected}>
+              <Picker.Item
+                label="Select Payback Period"
+                value="none"
+                color={Colors.gray}
+              />
+              {renderPaybackPeriodItems()}
+            </Picker>
+            <Button
+              title="Next"
+              style={styles.selectPaybackPeriodModalNextBtn}
+              onPress={onSelectPaybackPeriodNextButtonPressed}
+            />
+          </View>
+        </BottomModal>
+        <Loader visible={loaderLoading} />
+        <Dialog.Container visible={isRetourDialogShown}>
+          <Dialog.Title>
+            <Text style={styles.retourDialogTitleText}>Retour</Text>
+          </Dialog.Title>
+          <Dialog.Description style={styles.retourDialogText}>
+            This is meant for refund only,do not use for normal transactions.
+          </Dialog.Description>
+          <Dialog.Button
+            label="Cancel"
+            color={Colors.red}
+            onPress={closeRetourDialog}
+          />
+          <Dialog.Button label="Continue" onPress={onContinuePressed} />
+        </Dialog.Container>
+        <BalanceDialog
+          visible={balanceDialogShown}
+          description={
+            <Text>
+              {selectedIssuanceHistory?.clientName} Your balance for card number{' '}
+              {cardNumber} is :{' '}
+              <Text style={styles.balanceText}>
+                NAFL{' '}
+                {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
+              </Text>
+            </Text>
+          }
+          negativeButtonText="PRINT"
+          posititveButtonText="OK"
+          closeDialog={hideBalanceDialog}
+          onNegativeButtonPress={onPrintBalancePressed}
+        />
+      </ScreenContainer>
+    </ScrollView>
   );
 };
 
@@ -594,7 +632,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(40),
   },
   scanNfcBtn: {
-    marginTop: responsiveHeight(4),
+    marginTop: responsiveHeight(2),
     width: '80%',
   },
   modalContainer: {
