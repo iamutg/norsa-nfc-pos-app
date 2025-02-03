@@ -71,7 +71,7 @@ export const printReceipt = async (
         await printText('Signature:\n\n\n');
         await printText('Thank you for your purchase\n');
         await printText('For questions or inquiries call customer service:\n');
-        await printText(CustomerServiceContactNumber + '\n');
+        await printText(CustomerServiceContactNumber + '\n\n\n\n\n');
 
         console.log('Receipt printed successfully');
         await setPreviousPrintedReceipt(receiptNumber);
@@ -150,7 +150,7 @@ export const printDailyReceipt = async (
         await printText('Signature:\n\n\n');
         await printText('Thank you for your purchase\n');
         await printText('For questions or inquiries call customer service:\n');
-        await printText(CustomerServiceContactNumber + '\n');
+        await printText(CustomerServiceContactNumber + '\n\n\n\n\n');
 
         console.log('Daily receipt printed successfully');
       } catch (error) {
@@ -193,7 +193,7 @@ export const printBalance = async (
         await printText('Signature:\n\n\n');
         await printText('Thank you for your purchase\n');
         await printText('For questions or inquiries call customer service:\n');
-        await printText(CustomerServiceContactNumber + '\n');
+        await printText(CustomerServiceContactNumber + '\n\n\n\n\n');
 
         console.log('Balance printed successfully');
       } catch (error) {

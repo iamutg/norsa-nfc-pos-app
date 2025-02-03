@@ -8,7 +8,7 @@
     "start": "NODE_OPTIONS=--openssl-legacy-provider react-native start",
     "fastlane": "bundle exec fastlane",
     "build:android_release_apk_fastlane": "NODE_OPTIONS=--openssl-legacy-provider yarn fastlane android release_apk",
-    "build:android_release_apk_gradlew": "set NODE_OPTIONS=--openssl-legacy-provider && cd android && gradlew assembleRelease",
+    "build:android_release_apk_gradlew": "set NODE_OPTIONS=--openssl-legacy-provider && cd android && gradlew clean && gradlew assembleRelease",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },

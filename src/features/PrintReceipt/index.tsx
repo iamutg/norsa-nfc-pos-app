@@ -22,10 +22,13 @@ import AsyncStorage from '@react-native-community/async-storage';
 import {checkPrinterConnected} from '../BluetoothThermalPrinter';
 import {base64Image, logoBase64} from '~/assets/images/logoBase64';
 import {Button} from '~/components';
+import {useNavigation} from '@react-navigation/native';
 
 const {height, width} = Dimensions.get('window');
 
 const PrintReceipt = () => {
+  const navigation = useNavigation();
+
   const [pairedDs, setPairedDs] = useState([]);
   const [foundDs, setFoundDs] = useState([]);
   const [bleOpend, setBleOpend] = useState(false);
@@ -74,7 +77,7 @@ const PrintReceipt = () => {
   }, []);
 
   const _testPrint = async () => {
-    checkPrinterConnected().then(async isConnected => {
+    await checkPrinterConnected().then(async isConnected => {
       if (isConnected) {
         try {
           await BluetoothEscposPrinter.printerInit();
@@ -82,14 +85,14 @@ const PrintReceipt = () => {
           await BluetoothEscposPrinter.printText('Merpol\n\r', {});
           await BluetoothEscposPrinter.printText('Hello World\n\r', {});
         } catch (error) {
-          Alert.alert('Error', error.message ?? 'Failed to print');
+          // Alert.alert('Error', error.message ?? 'Failed to print');
         }
       }
     });
   };
 
   const _printLogo = async () => {
-    checkPrinterConnected().then(async isConnected => {
+    await checkPrinterConnected().then(async isConnected => {
       if (isConnected) {
         try {
           await BluetoothEscposPrinter.printerInit();
@@ -99,14 +102,14 @@ const PrintReceipt = () => {
             left: 40,
           });
         } catch (error) {
-          Alert.alert('Error', error.message ?? 'Failed to print');
+          // Alert.alert('Error', error.message ?? 'Failed to print');
         }
       }
     });
   };
 
   const _printLogoMerpol = async () => {
-    checkPrinterConnected().then(async isConnected => {
+    await checkPrinterConnected().then(async isConnected => {
       if (isConnected) {
         try {
           await BluetoothEscposPrinter.printerInit();
@@ -116,7 +119,7 @@ const PrintReceipt = () => {
             left: 40,
           });
         } catch (error) {
-          Alert.alert('Error', error.message ?? 'Failed to print');
+          // Alert.alert('Error', error.message ?? 'Failed to print');
         }
       }
     });
@@ -128,7 +131,7 @@ const PrintReceipt = () => {
         const dlog = await AsyncStorage.getItem('@dataprinter');
         JSON.parse(dlog, (key, value) => {
           if (key === 'boundAddress') setBoundAddress(value);
-          if (key === 'name') setName(value);
+          // if (key === 'name') setName(value);
         });
       } catch (e) {
         // alert('Error reading value: ' + e);
@@ -218,9 +221,25 @@ const PrintReceipt = () => {
   return (
     <View style={styles.container}>
       <ScrollView>
-        <Text style={styles.title}>
-          Bluetooth Opened: {bleOpend ? 'true' : 'false'}
-          <Text> Open BLE Before Scanning</Text>
+        <Text
+          style={{
+            fontSize: 20,
+            textAlign: 'center',
+            padding: 20,
+            fontWeight: 'bold',
+          }}>
+          Printer Configuration
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            textAlign: 'center',
+            padding: 20,
+            fontWeight: 'bold',
+            color: 'red',
+          }}>
+          Please turn on the bluetooth and pair the printer before using this
+          application.
         </Text>
         <View>
           <Switch
@@ -284,6 +303,20 @@ const PrintReceipt = () => {
             paddingVertical: 30,
           }}>
           <Button
+            title="Back"
+            onPress={() => {
+              navigation.goBack();
+            }}
+          />
+        </View>
+        {/* <View
+          style={{
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingVertical: 30,
+          }}>
+          <Button
             style={{marginTop: 10}}
             title="Print Test Logo"
             onPress={_printLogo}
@@ -293,13 +326,13 @@ const PrintReceipt = () => {
             title="Print  Merpol Logo"
             onPress={_printLogoMerpol}
           />
-          <PrintButton title="Test Bold Styles" />
+
           <Button
             style={{marginTop: 10}}
             title="Test Print"
             onPress={_testPrint}
           />
-        </View>
+        </View> */}
       </ScrollView>
     </View>
   );

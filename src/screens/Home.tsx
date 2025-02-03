@@ -407,6 +407,23 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
     }
   }, [scanningStatus]);
 
+  const [printerLoading, setPrinterLoading] = React.useState(true);
+
+  const renderModalPrinterContent = useCallback(() => {
+    if (printerLoading) {
+      setTimeout(() => {
+        setPrinterLoading(false);
+        navigate(routeNames.TestPrintPage);
+      }, 1000);
+    }
+    return (
+      <View style={styles.nfcContentContainer}>
+        <ActivityIndicator animating color={Colors.primary} size="large" />
+        <Text style={styles.scanningNfcText}>Initializing Printer</Text>
+      </View>
+    );
+  }, [printerLoading]);
+
   const renderButtons = useCallback(() => {
     if (appModes === 'expense-retour') {
       return (
@@ -492,6 +509,20 @@ const Home: FC<Props> = ({navigation: {navigate}}) => {
             />
           </View>
         </View>
+        <BottomModal visible={printerLoading}>
+          <View style={styles.modalContainer}>
+            <TouchableOpacity
+              style={styles.closeBottomModalBtn}
+              onPress={hideBottomModal}>
+              <Icons.MaterialIcons
+                name="close"
+                color={Colors.black}
+                size={responsiveFontSize(4)}
+              />
+            </TouchableOpacity>
+            {renderModalPrinterContent()}
+          </View>
+        </BottomModal>
         <BottomModal visible={bottomModalShown}>
           <View style={styles.modalContainer}>
             <TouchableOpacity

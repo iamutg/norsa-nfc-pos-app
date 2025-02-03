@@ -14,7 +14,7 @@ async function checkPrinterConnected(): Promise<boolean> {
       await BluetoothEscposPrinter.printerAlign(ALIGN.CENTER);
       resolve(true);
     } catch (err) {
-      connectRecentlyUsedPrinter();
+      await connectRecentlyUsedPrinter();
       resolve(true);
     }
   });
@@ -40,12 +40,13 @@ const enableBluetoothAndConnectFirstPairedPrinter = async () => {
           const address = selectedPrinter.address;
           const name = selectedPrinter.name;
           AsyncStorage.setItem('@dataprinter', JSON.stringify({address, name}));
+          showToastWithGravity(`Connecting to printer - ${address}`);
           (BluetoothManager.connect(address) as any)
             .then(() => {
               showToastWithGravity('Connected to printer');
             })
             .catch(error => {
-              console.error('Error connecting to printer', error);
+              // console.error('Error connecting to printer', error);
               showToastWithGravity('Printer not connected');
             });
         } catch (e) {
@@ -66,15 +67,15 @@ const connectedLocalStoragePrinter = async () => {
     if (key === 'address') {
       await (BluetoothManager.connect(value) as any)
         .then(async () => {
-          await showToastWithGravity('Connected to printer');
+          showToastWithGravity('Connected to printer');
         })
         .catch(error => {
-          console.error('Error connecting to printer', error);
+          // console.error('Error connecting to printer', error);
           showToastWithGravity('Error connecting to printer');
         });
     } else {
       console.log('Invalid printer address');
-      (BluetoothManager.disableBluetooth() as any).then(async () => {
+      await (BluetoothManager.disableBluetooth() as any).then(async () => {
         await enableBluetoothAndConnectFirstPairedPrinter();
       });
     }
