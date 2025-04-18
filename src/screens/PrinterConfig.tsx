@@ -81,7 +81,7 @@ const PrinterConfig: FC<Props> = ({}) => {
       `[L]\n` +
       '[C]================================\n' +
       '[L]\n' +
-      `[L]Sale Amount :[R]NAFL ${_expenseAmount}\n` +
+      `[L]Sale Amount :[R]XCG ${_expenseAmount}\n` +
       '[L]\n' +
       '[C]================================\n' +
       '[L]\n' +

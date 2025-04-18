@@ -337,7 +337,7 @@ const PrintExpense: FC<Props> = ({route, navigation}) => {
           <Text>
             Current balance is{' '}
             <Text style={styles.balanceText}>
-              NAFL
+              XCG
               {parseFloat(selectedIssuanceHistory?.Balance ?? '0').toFixed(2)}
             </Text>
             . Do you wish to continue the transaction?
