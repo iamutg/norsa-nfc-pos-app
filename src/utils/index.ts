@@ -62,7 +62,7 @@ export const showPrintBalanceAlert: (
 ) => void = ({balance, cardNumber, customerName}, onPrintPress) => {
   Alert.alert(
     'Balance',
-    `${customerName} Your balance for card number ${cardNumber} is : NAFL ${balance.toFixed(
+    `${customerName} Your balance for card number ${cardNumber} is : XCG ${balance.toFixed(
       2,
     )}`,
     [

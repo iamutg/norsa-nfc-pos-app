@@ -62,7 +62,7 @@ export const printReceipt = async (
             ? 'Sale Amount: '
             : 'Retour Amount: ',
         );
-        await printText('NAFL ' + price.toFixed(2) + '\n');
+        await printText('XCG ' + price.toFixed(2) + '\n');
         await printText('==============================\n');
         await printText('Payback period (months): ' + paybackPeriod + '\n');
         await printText('Merchant: ' + merchantName + '\n');
@@ -104,7 +104,7 @@ export const printDailyReceipt = async (
               prev +
               curr.Client_id +
               ': ' +
-              'NAFL ' +
+              'XCG ' +
               (curr.transactionType === TransactionType.retour ? '-' : ' ') +
               curr.AmountUser.toFixed(2) +
               '\n' +
@@ -145,7 +145,7 @@ export const printDailyReceipt = async (
         await printText('==============================\n');
         await printText(listOfExpenses);
         await printText('==============================\n');
-        await printText('Total: NAFL ' + totalExpense + '\n\n');
+        await printText('Total: XCG ' + totalExpense + '\n\n');
         await printText('Merchant: ' + merchantName + '\n\n');
         await printText('Signature:\n\n\n');
         await printText('Thank you for your purchase\n');
@@ -183,7 +183,7 @@ export const printBalance = async (
         await printText('Receipt N.O: ' + receiptNumber + '\n');
         await printText(dateTime + '\n');
         await printText('==============================\n');
-        await printText('Balance: NAFL ' + balance.toFixed(2) + '\n');
+        await printText('Balance: XCG ' + balance.toFixed(2) + '\n');
         await printText('Card Number: ' + cardNumber + '\n');
         await printText('==============================\n');
         await printText('Payback period (months): ' + paybackPeriod + '\n');
