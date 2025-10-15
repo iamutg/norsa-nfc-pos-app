@@ -31,7 +31,7 @@ import io.invertase.firebase.crashlytics.ReactNativeFirebaseCrashlyticsNativeHel
 public class PosPrinterModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
     private static final String TAG = "PosPrinterModule";
-    private static final String PRINTER_MAC_ADDRESS = "00:11:22:33:44:55"; // 🔹 Change this to your printer MAC
+    private static final String PRINTER_MAC_ADDRESS = "18:10:77:00:10:46"; // 🔹 Change this to your printer MAC
     private static BluetoothConnection bluetoothConnection = null;
     private static EscPosPrinter escPosPrinter = null;
     private final Handler keepAliveHandler = new Handler();
